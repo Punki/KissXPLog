@@ -1,0 +1,14 @@
+/venv/
+.idea/
+**/__pycache__/**
+**/core
+
+/KissXPLog/data/*
+/KissXPLog/KissXPLog.log
+
+#Personal Stuff
+/KissXPLog/scratch.py
+/htmlcov/
+/.coverage
+/KissXPLog/temp/
+/KissXPLog/data/
