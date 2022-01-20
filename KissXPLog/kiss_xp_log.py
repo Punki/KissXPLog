@@ -19,6 +19,8 @@ from KissXPLog.dialog.config_dialog import ConfigDialog
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
+from KissXPLog.qrz_lookup import get_dxcc_from_callsign
+from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
     prune_qsos
 from KissXPLog.table_model import TableModel
@@ -51,6 +53,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Which row should be Updated
         self.row = None
         self._do_we_have_unsaved_changes = False
+
+        self.all_dxcc = {}
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
                           'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD',
@@ -123,10 +127,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.discardAction = QAction("&Discard", self)
         self.editTableAction = QAction("&Edit Table", self)
 
-        # Help Menu Actions
-        # self.helpContentAction = QAction("&Help Content", self)
-        # self.aboutAction = QAction("&About", self)
-
     def _createMenuBar(self):
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu("&File")
@@ -143,13 +143,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editMenu.addAction(self.discardAction)
         editMenu.addAction(self.editTableAction)
 
-        # helpMenu = menuBar.addMenu("&Help")
-        # helpMenu.addAction(self.helpContentAction)
-        # helpMenu.addAction(self.aboutAction)
+    def _createFullDevMenu(self):
+        self.new_dev_menu_method = QAction("Simple Thread", self)
+        devMenu = self.menuBar().addMenu("&DEV")
+        devMenu.addAction(self.new_dev_menu_method)
+        # self.new_dev_menu_method.triggered.connect(get_new_plist)
 
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
-        self.ui.le_call.editingFinished.connect(self.set_time_and_country_after_call)
+        self.ui.le_call.editingFinished.connect(self.new_dxcc_lookup_thrad)
         # UE: Fill Freq from Band und Vice Versa
         self.ui.le_freq.textEdited.connect(self.set_band_from_frequency)
         self.ui.cb_band.currentIndexChanged.connect(self.set_frequency_from_band)
@@ -206,6 +208,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.autosave:
             if self.autosave_interval == 0:
                 self.autosave_to_file()
+
+    def new_thread_methoden_test(self):
+        t = threading.Thread(target=self.print_something_useful, daemon=True)
+        print(f"Threads activ: {threading.enumerate()}")
+        t.start()
 
     def load_user_settings(self):
         logging.info(f"Loaded User Config.")
@@ -278,6 +285,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.ui.le_rst_sent.setText("59")
                     self.ui.le_rst_rcvd.setText("59")
 
+    def new_dxcc_lookup_thrad(self):
+        callsign = self.ui.le_call.text()
+        t = threading.Thread(target=self.dxcc_lookup, args=(callsign,), daemon=True)
+        t.start()
+
+    def dxcc_lookup(self, callsign):
+        self.all_dxcc = get_dxcc_from_callsign(callsign)
+        self.set_time_and_country_after_call()
+
     def set_time_and_country_after_call(self):
         # Improvement for better User experience
         # Todo: Make Function to get Country from Prefix
@@ -287,6 +303,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.ui.timeEdit.time().toString("HHmmss") == '000000':
             if self.ui.dateEdit.date().toString("yyyyMMdd") == '20000101':
                 self.update_date_and_time_for_new_qso()
+        if len(self.all_dxcc) > 0:
+            self.ui.le_country.setText(self.all_dxcc['Country'])
+            self.ui.le_continent.setText(self.all_dxcc['Continent'])
+            self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
+            self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
 
     def set_frequency_from_band(self):
         # check if freq is empty!
