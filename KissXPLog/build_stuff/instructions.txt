@@ -1,0 +1,8 @@
+# Download for Upx
+https://github.com/upx/upx/releases/tag/v3.96
+
+
+# Windows DEV Build:
+pyinstaller KissXPLog\build_stuff\DEV_KissXPLog.spec --upx-dir=upx-3.96-win64
+
+
