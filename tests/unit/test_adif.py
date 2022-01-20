@@ -24,36 +24,36 @@ class RemoveHeaderFromAdif(TestCase):
 class MappingAdifToCustomStatusCARD(TestCase):
 
     def test_SEND_and_Request_CARD(self):
-        single_qso_dict_input = {"CARD_SEND": "Y", "CARD_RCVD": "R"}
-        expect = {"CARD_SEND": "Y", "CARD_RCVD": "R", "CST_CARD_SEND": True, "CST_CARD_REQUEST": True}
+        single_qso_dict_input = {"QSL_SENT": "Y", "QSL_RCVD": "R"}
+        expect = {"QSL_SENT": "Y", "QSL_RCVD": "R", "CST_QSL_SENT": True, "CST_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_and_Request_CARD(self):
-        single_qso_dict_input = {"CARD_SEND": "Q", "CARD_RCVD": "Y"}
-        expect = {"CARD_SEND": "Q", "CARD_RCVD": "Y", "CST_CARD_RCVD": True, "CST_CARD_REQUEST": True}
+        single_qso_dict_input = {"QSL_SENT": "Q", "QSL_RCVD": "Y"}
+        expect = {"QSL_SENT": "Q", "QSL_RCVD": "Y", "CST_QSL_RCVD": True, "CST_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
-    def test_Send_CARD(self):
-        single_qso_dict_input = {"CARD_SEND": "Y"}
-        expect = {"CARD_SEND": "Y", "CST_CARD_SEND": True}
+    def test_Sent_CARD(self):
+        single_qso_dict_input = {"QSL_SENT": "Y"}
+        expect = {"QSL_SENT": "Y", "CST_QSL_SENT": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_CARD(self):
-        single_qso_dict_input = {"CARD_RCVD": "Y"}
-        expect = {"CARD_RCVD": "Y", "CST_CARD_RCVD": True}
+        single_qso_dict_input = {"QSL_RCVD": "Y"}
+        expect = {"QSL_RCVD": "Y", "CST_QSL_RCVD": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_Request_CARD(self):
-        single_qso_dict_input = {"CARD_SEND": "Q"}
-        expect = {"CARD_SEND": "Q", "CST_CARD_REQUEST": True}
+        single_qso_dict_input = {"QSL_SENT": "Q"}
+        expect = {"QSL_SENT": "Q", "CST_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
@@ -61,36 +61,36 @@ class MappingAdifToCustomStatusCARD(TestCase):
 
 class MappingAdifToCustomStatusEQSL(TestCase):
     def test_SEND_and_Request_EQSL(self):
-        single_qso_dict_input = {"EQSL_SEND": "Y", "EQSL_RCVD": "R"}
-        expect = {"EQSL_SEND": "Y", "EQSL_RCVD": "R", "CST_EQSL_SEND": True, "CST_EQSL_REQUEST": True}
+        single_qso_dict_input = {"EQSL_QSL_SENT": "Y", "EQSL_QSL_RCVD": "R"}
+        expect = {"EQSL_QSL_SENT": "Y", "EQSL_QSL_RCVD": "R", "CST_EQSL_QSL_SENT": True, "CST_EQSL_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_and_Request_EQSL(self):
-        single_qso_dict_input = {"EQSL_SEND": "Q", "EQSL_RCVD": "Y"}
-        expect = {"EQSL_SEND": "Q", "EQSL_RCVD": "Y", "CST_EQSL_RCVD": True, "CST_EQSL_REQUEST": True}
+        single_qso_dict_input = {"EQSL_QSL_SENT": "Q", "EQSL_QSL_RCVD": "Y"}
+        expect = {"EQSL_QSL_SENT": "Q", "EQSL_QSL_RCVD": "Y", "CST_EQSL_QSL_RCVD": True, "CST_EQSL_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
-    def test_Send_EQSL(self):
-        single_qso_dict_input = {"EQSL_SEND": "Y"}
-        expect = {"EQSL_SEND": "Y", "CST_EQSL_SEND": True}
+    def test_Sent_EQSL(self):
+        single_qso_dict_input = {"EQSL_QSL_SENT": "Y"}
+        expect = {"EQSL_QSL_SENT": "Y", "CST_EQSL_QSL_SENT": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_EQSL(self):
-        single_qso_dict_input = {"EQSL_RCVD": "Y"}
-        expect = {"EQSL_RCVD": "Y", "CST_EQSL_RCVD": True}
+        single_qso_dict_input = {"EQSL_QSL_RCVD": "Y"}
+        expect = {"EQSL_QSL_RCVD": "Y", "CST_EQSL_QSL_RCVD": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_Request_EQSL(self):
-        single_qso_dict_input = {"EQSL_SEND": "Q"}
-        expect = {"EQSL_SEND": "Q", "CST_EQSL_REQUEST": True}
+        single_qso_dict_input = {"EQSL_QSL_SENT": "Q"}
+        expect = {"EQSL_QSL_SENT": "Q", "CST_EQSL_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
@@ -98,36 +98,36 @@ class MappingAdifToCustomStatusEQSL(TestCase):
 
 class MappingAdifToCustomStatusLOTW(TestCase):
     def test_SEND_and_Request_LOTW(self):
-        single_qso_dict_input = {"LOTW_SEND": "Y", "LOTW_RCVD": "R"}
-        expect = {"LOTW_SEND": "Y", "LOTW_RCVD": "R", "CST_LOTW_SEND": True, "CST_LOTW_REQUEST": True}
+        single_qso_dict_input = {"LOTW_QSL_SENT": "Y", "LOTW_QSL_RCVD": "R"}
+        expect = {"LOTW_QSL_SENT": "Y", "LOTW_QSL_RCVD": "R", "CST_LOTW_QSL_SENT": True, "CST_LOTW_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_and_Request_LOTW(self):
-        single_qso_dict_input = {"LOTW_SEND": "Q", "LOTW_RCVD": "Y"}
-        expect = {"LOTW_SEND": "Q", "LOTW_RCVD": "Y", "CST_LOTW_RCVD": True, "CST_LOTW_REQUEST": True}
+        single_qso_dict_input = {"LOTW_QSL_SENT": "Q", "LOTW_QSL_RCVD": "Y"}
+        expect = {"LOTW_QSL_SENT": "Q", "LOTW_QSL_RCVD": "Y", "CST_LOTW_QSL_RCVD": True, "CST_LOTW_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
-    def test_Send_LOTW(self):
-        single_qso_dict_input = {"LOTW_SEND": "Y"}
-        expect = {"LOTW_SEND": "Y", "CST_LOTW_SEND": True}
+    def test_Sent_LOTW(self):
+        single_qso_dict_input = {"LOTW_QSL_SENT": "Y"}
+        expect = {"LOTW_QSL_SENT": "Y", "CST_LOTW_QSL_SENT": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_LOTW(self):
-        single_qso_dict_input = {"LOTW_RCVD": "Y"}
-        expect = {"LOTW_RCVD": "Y", "CST_LOTW_RCVD": True}
+        single_qso_dict_input = {"LOTW_QSL_RCVD": "Y"}
+        expect = {"LOTW_QSL_RCVD": "Y", "CST_LOTW_QSL_RCVD": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_Request_LOTW(self):
-        single_qso_dict_input = {"LOTW_SEND": "Q"}
-        expect = {"LOTW_SEND": "Q", "CST_LOTW_REQUEST": True}
+        single_qso_dict_input = {"LOTW_QSL_SENT": "Q"}
+        expect = {"LOTW_QSL_SENT": "Q", "CST_LOTW_QSL_REQUEST": True}
 
         result = qso_status_from_adif_to_custom_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
@@ -135,36 +135,36 @@ class MappingAdifToCustomStatusLOTW(TestCase):
 
 class MappingCustomToAdifStatusCARD(TestCase):
     def test_SEND_and_Request_CARD(self):
-        single_qso_dict_input = {"CST_CARD_SEND": True, "CST_CARD_REQUEST": True}
-        expect = {"CST_CARD_SEND": True, "CST_CARD_REQUEST": True, "CARD_SEND": "Y", "CARD_RCVD": "R"}
+        single_qso_dict_input = {"CST_QSL_SENT": True, "CST_QSL_REQUEST": True}
+        expect = {"CST_QSL_SENT": True, "CST_QSL_REQUEST": True, "QSL_SENT": "Y", "QSL_RCVD": "R"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_and_Request_CARD(self):
-        single_qso_dict_input = {"CST_CARD_RCVD": True, "CST_CARD_REQUEST": True}
-        expect = {"CST_CARD_RCVD": True, "CST_CARD_REQUEST": True, "CARD_SEND": "Q", "CARD_RCVD": "Y"}
+        single_qso_dict_input = {"CST_QSL_RCVD": True, "CST_QSL_REQUEST": True}
+        expect = {"CST_QSL_RCVD": True, "CST_QSL_REQUEST": True, "QSL_SENT": "Q", "QSL_RCVD": "Y"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
-    def test_Send_CARD(self):
-        single_qso_dict_input = {"CST_CARD_SEND": True}
-        expect = {"CST_CARD_SEND": True, "CARD_SEND": "Y", "CARD_RCVD": "N"}
+    def test_Sent_CARD(self):
+        single_qso_dict_input = {"CST_QSL_SENT": True}
+        expect = {"CST_QSL_SENT": True, "QSL_SENT": "Y", "QSL_RCVD": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_CARD(self):
-        single_qso_dict_input = {"CST_CARD_RCVD": True}
-        expect = {"CST_CARD_RCVD": True, "CARD_RCVD": "Y", "CARD_SEND": "N"}
+        single_qso_dict_input = {"CST_QSL_RCVD": True}
+        expect = {"CST_QSL_RCVD": True, "QSL_RCVD": "Y", "QSL_SENT": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_Request_CARD(self):
-        single_qso_dict_input = {"CST_CARD_REQUEST": True}
-        expect = {"CST_CARD_REQUEST": True, "CARD_SEND": "Q", "CARD_RCVD": "N"}
+        single_qso_dict_input = {"CST_QSL_REQUEST": True}
+        expect = {"CST_QSL_REQUEST": True, "QSL_SENT": "Q", "QSL_RCVD": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
@@ -172,36 +172,36 @@ class MappingCustomToAdifStatusCARD(TestCase):
 
 class MappingCustomToAdifStatusEQSL(TestCase):
     def test_SEND_and_Request_EQSL(self):
-        single_qso_dict_input = {"CST_EQSL_SEND": True, "CST_EQSL_REQUEST": True}
-        expect = {"CST_EQSL_SEND": True, "CST_EQSL_REQUEST": True, "EQSL_SEND": "Y", "EQSL_RCVD": "R"}
+        single_qso_dict_input = {"CST_EQSL_QSL_SENT": True, "CST_EQSL_QSL_REQUEST": True}
+        expect = {"CST_EQSL_QSL_SENT": True, "CST_EQSL_QSL_REQUEST": True, "EQSL_QSL_SENT": "Y", "EQSL_QSL_RCVD": "R"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_and_Request_EQSL(self):
-        single_qso_dict_input = {"CST_EQSL_RCVD": True, "CST_EQSL_REQUEST": True}
-        expect = {"CST_EQSL_RCVD": True, "CST_EQSL_REQUEST": True, "EQSL_SEND": "Q", "EQSL_RCVD": "Y"}
+        single_qso_dict_input = {"CST_EQSL_QSL_RCVD": True, "CST_EQSL_QSL_REQUEST": True}
+        expect = {"CST_EQSL_QSL_RCVD": True, "CST_EQSL_QSL_REQUEST": True, "EQSL_QSL_SENT": "Q", "EQSL_QSL_RCVD": "Y"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
-    def test_Send_EQSL(self):
-        single_qso_dict_input = {"CST_EQSL_SEND": True}
-        expect = {"CST_EQSL_SEND": True, "EQSL_SEND": "Y", "EQSL_RCVD": "N"}
+    def test_Sent_EQSL(self):
+        single_qso_dict_input = {"CST_EQSL_QSL_SENT": True}
+        expect = {"CST_EQSL_QSL_SENT": True, "EQSL_QSL_SENT": "Y", "EQSL_QSL_RCVD": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_EQSL(self):
-        single_qso_dict_input = {"CST_EQSL_RCVD": True}
-        expect = {"CST_EQSL_RCVD": True, "EQSL_RCVD": "Y", "EQSL_SEND": "N"}
+        single_qso_dict_input = {"CST_EQSL_QSL_RCVD": True}
+        expect = {"CST_EQSL_QSL_RCVD": True, "EQSL_QSL_RCVD": "Y", "EQSL_QSL_SENT": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_Request_EQSL(self):
-        single_qso_dict_input = {"CST_EQSL_REQUEST": True}
-        expect = {"CST_EQSL_REQUEST": True, "EQSL_SEND": "Q", "EQSL_RCVD": "N"}
+        single_qso_dict_input = {"CST_EQSL_QSL_REQUEST": True}
+        expect = {"CST_EQSL_QSL_REQUEST": True, "EQSL_QSL_SENT": "Q", "EQSL_QSL_RCVD": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
@@ -209,36 +209,36 @@ class MappingCustomToAdifStatusEQSL(TestCase):
 
 class MappingCustomToAdifStatusLOTW(TestCase):
     def test_SEND_and_Request_LOTW(self):
-        single_qso_dict_input = {"CST_LOTW_SEND": True, "CST_LOTW_REQUEST": True}
-        expect = {"CST_LOTW_SEND": True, "CST_LOTW_REQUEST": True, "LOTW_SEND": "Y", "LOTW_RCVD": "R"}
+        single_qso_dict_input = {"CST_LOTW_QSL_SENT": True, "CST_LOTW_QSL_REQUEST": True}
+        expect = {"CST_LOTW_QSL_SENT": True, "CST_LOTW_QSL_REQUEST": True, "LOTW_QSL_SENT": "Y", "LOTW_QSL_RCVD": "R"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_and_Request_LOTW(self):
-        single_qso_dict_input = {"CST_LOTW_RCVD": True, "CST_LOTW_REQUEST": True}
-        expect = {"CST_LOTW_RCVD": True, "CST_LOTW_REQUEST": True, "LOTW_SEND": "Q", "LOTW_RCVD": "Y"}
+        single_qso_dict_input = {"CST_LOTW_QSL_RCVD": True, "CST_LOTW_QSL_REQUEST": True}
+        expect = {"CST_LOTW_QSL_RCVD": True, "CST_LOTW_QSL_REQUEST": True, "LOTW_QSL_SENT": "Q", "LOTW_QSL_RCVD": "Y"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
-    def test_Send_LOTW(self):
-        single_qso_dict_input = {"CST_LOTW_SEND": True}
-        expect = {"CST_LOTW_SEND": True, "LOTW_SEND": "Y", "LOTW_RCVD": "N"}
+    def test_Sent_LOTW(self):
+        single_qso_dict_input = {"CST_LOTW_QSL_SENT": True}
+        expect = {"CST_LOTW_QSL_SENT": True, "LOTW_QSL_SENT": "Y", "LOTW_QSL_RCVD": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_RCVD_LOTW(self):
-        single_qso_dict_input = {"CST_LOTW_RCVD": True}
-        expect = {"CST_LOTW_RCVD": True, "LOTW_RCVD": "Y", "LOTW_SEND": "N"}
+        single_qso_dict_input = {"CST_LOTW_QSL_RCVD": True}
+        expect = {"CST_LOTW_QSL_RCVD": True, "LOTW_QSL_RCVD": "Y", "LOTW_QSL_SENT": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
 
     def test_Request_LOTW(self):
-        single_qso_dict_input = {"CST_LOTW_REQUEST": True}
-        expect = {"CST_LOTW_REQUEST": True, "LOTW_SEND": "Q", "LOTW_RCVD": "N"}
+        single_qso_dict_input = {"CST_LOTW_QSL_REQUEST": True}
+        expect = {"CST_LOTW_QSL_REQUEST": True, "LOTW_QSL_SENT": "Q", "LOTW_QSL_RCVD": "N"}
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
