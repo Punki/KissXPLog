@@ -1,120 +1,16 @@
-import json
 import logging
-import os
 from functools import partial
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
-from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog
 
-from KissXPLog import adif
-from KissXPLog.adif import qso_status_from_custom_to_adif_mapping
+from KissXPLog.adif import qso_status_from_custom_to_adif_mapping, parse_adif_for_data
+from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
-from KissXPLog.qso_operations import remove_duplicates_in_new_qsos, update_old_qsos_with_new_information, \
-    add_new_qsos_to_list
+from KissXPLog.messages import show_error_message, show_info_message
+from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list
 from KissXPLog.table_model import TableModel
-
-work_dir = os.path.dirname(os.path.realpath(__file__))
-data_dir = os.path.join(work_dir, "data")
-
-
-def show_info_message(title, message):
-    msg_box = QtWidgets.QMessageBox()
-    msg_box.setIcon(QMessageBox.Icon.Information)
-    msg_box.setWindowTitle(title)
-    msg_box.setText(message)
-    msg_box.exec_()
-    logging.info(message)
-
-
-def show_error_message(title, message):
-    err_box = QtWidgets.QMessageBox()
-    err_box.setIcon(QMessageBox.Icon.Warning)
-    err_box.setWindowTitle(title)
-    err_box.setText(message)
-    err_box.exec_()
-    logging.error(message)
-
-
-def read_data_from_json_file(file_to_read_from):
-    try:
-        with open(file_to_read_from, "r") as json_file:
-            data = json.load(json_file)
-    except FileNotFoundError:
-        show_error_message("Error", "File not found: {}.".format(file_to_read_from))
-    except PermissionError:
-        show_error_message("Error", "Access Denied to file: {}.".format(file_to_read_from))
-    except IOError:
-        show_error_message("Error", "IO Error.")
-    except Exception as e:
-        show_error_message("Error", "IDK man, something went wrong: {}".format(e))
-    return data
-
-
-def write_file_as_json(filename, data_to_write):
-    with open(filename, "w") as open_file:
-        json.dump(data_to_write, open_file, indent=4)
-        logging.debug(f"File {filename} was written successfully")
-
-
-def parse_adif_for_data(filename):
-    new_data = adif.read(filename)
-    return adif.parse_adif(new_data)
-
-
-def add_new_information_to_qso_list(old_qsos, new_qsos):
-    # Only Update the Dict if more Fields are in the new
-    # Quadratischer Aufwand da doppel loop!
-    new_qsos = remove_duplicates_in_new_qsos(old_qsos, new_qsos)
-    old_qsos = update_old_qsos_with_new_information(old_qsos, new_qsos)
-    old_qsos = add_new_qsos_to_list(old_qsos, new_qsos)
-    return old_qsos
-
-
-def are_minimum_qso_data_present(qso_to_check):
-    minimal_qso_keys = ["CALL", "QSO_DATE", "TIME_ON", "FREQ", "MODE", "RST_SENT", "RST_RCVD"]
-    # Sicherstellen alle benötigten Keys vorhanden sind und Values nicht None oder '' sind.
-    for k in minimal_qso_keys:
-        if not qso_to_check.get(k):
-            return False
-    return True
-
-
-def remove_empty_fields(qso_to_check):
-    """Removes None, "", False values from dict."""
-    return dict((k, v) for k, v in qso_to_check.items() if v)
-
-
-def generic_save_data_to_file(filename, data_to_write, exclude_fields=None):
-    logging.debug(f"Save table to: {filename}.")
-    # Todo Add saver way for > [0]
-    file_extension = str(filename).strip().split(".", 1)[1]
-    if file_extension == "json":
-        write_file_as_json(filename, data_to_write)
-    elif file_extension == "adi" or file_extension == "adif":
-        adif.export_to_adif(filename, data_to_write, exclude_fields)
-    else:
-        show_error_message("Error", f"Data Type is not supported: {file_extension}")
-        return
-
-
-def initial_file_dialog_config(file_extension):
-    filedialog = QFileDialog()
-    filedialog.setDirectory(data_dir)
-    filedialog.setViewMode(QFileDialog.Detail)
-    filedialog.setFileMode(QFileDialog.ExistingFile)
-    if file_extension == "json":
-        filedialog.setDefaultSuffix("json")
-        filedialog.setNameFilter("Json Datenbank (*.json);;All files (*.*)")
-        filedialog.selectFile("QSO_MGM_Export.json")
-    elif file_extension == "adif" or "adi":
-        filedialog.setDefaultSuffix("adi")
-        filedialog.setNameFilter("Adif (*.adi);;All files (*.*)")
-        filedialog.selectFile("QSO_Export.adi")
-    else:
-        logging.error(f"Data Type is not supported: {file_extension}")
-
-    return filedialog
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -140,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                           'COUNTRY', 'CARD_SEND', 'CARD_RCVD', 'EQSL_SEND', 'EQSL_RCVD', 'LOTW_SEND', 'LOTW_RCVD',
                           'NOTES']
 
-        self.bands = ['', '80m', '40m', '30m', '20m', '17m', '15m']
+        self.bands = ['', '160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m']
         self.modes = ['', 'SSB', 'CW', 'FT8']
         self.custom_fields_list = ['CST_CARD_RCVD', 'CST_CARD_SEND', 'CST_CARD_REQUEST', 'CST_EQSL_RCVD',
                                    'CST_EQSL_SEND', 'CST_EQSL_REQUEST', 'CST_LOTW_RCVD', 'CST_LOTW_SEND',
