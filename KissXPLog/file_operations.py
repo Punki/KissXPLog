@@ -12,7 +12,6 @@ def initial_file_dialog_config(file_extension):
     filedialog = QFileDialog()
     filedialog.setDirectory(data_dir)
     filedialog.setViewMode(QFileDialog.Detail)
-    filedialog.setFileMode(QFileDialog.ExistingFile)
     if file_extension == "json":
         filedialog.setDefaultSuffix("json")
         filedialog.setNameFilter("Json Datenbank (*.json);;All files (*.*)")

@@ -121,29 +121,29 @@ def split_single_QSO(single_raw_qso):
 
 
 def qso_status_from_adif_to_custom_mapping(single_qso_dict):
-    all_options = ["CARD", "EQSL", "LOTW"]
+    all_options = ["QSL", "EQSL_QSL", "LOTW_QSL"]
 
     for option in all_options:
 
-        generic_send = single_qso_dict.get(F"{option}_SEND")
+        generic_sent = single_qso_dict.get(F"{option}_SENT")
         generic_rcvd = single_qso_dict.get(F"{option}_RCVD")
 
-        CST_Option_SEND = F"CST_{option}_SEND"
+        CST_Option_SENT = F"CST_{option}_SENT"
         CST_Option_RCVD = F"CST_{option}_RCVD"
         CST_Option_REQUEST = F"CST_{option}_REQUEST"
 
-        if generic_send == 'Y' and generic_rcvd == 'R':
-            single_qso_dict.update({CST_Option_SEND: True})
+        if generic_sent == 'Y' and generic_rcvd == 'R':
+            single_qso_dict.update({CST_Option_SENT: True})
             single_qso_dict.update({CST_Option_REQUEST: True})
 
-        elif generic_rcvd == 'Y' and generic_send == 'Q':
+        elif generic_rcvd == 'Y' and generic_sent == 'Q':
             single_qso_dict.update({CST_Option_RCVD: True})
             single_qso_dict.update({CST_Option_REQUEST: True})
 
-        if generic_send == 'Q':
+        if generic_sent == 'Q':
             single_qso_dict.update({CST_Option_REQUEST: True})
-        if generic_send == 'Y':
-            single_qso_dict.update({CST_Option_SEND: True})
+        if generic_sent == 'Y':
+            single_qso_dict.update({CST_Option_SENT: True})
         if generic_rcvd == 'Y':
             single_qso_dict.update({CST_Option_RCVD: True})
 
@@ -151,42 +151,42 @@ def qso_status_from_adif_to_custom_mapping(single_qso_dict):
 
 
 def qso_status_from_custom_to_adif_mapping(single_qso_dict):
-    all_options = ["CARD", "EQSL", "LOTW"]
+    all_options = ["QSL", "EQSL_QSL", "LOTW_QSL"]
 
     for option in all_options:
-        # 'CST_CARD_SEND'/'CST_CARD_RCVD'/'CST_CARD_REQUEST'
-        cst_generic_send = F"CST_{option}_SEND"
+        # 'CST_QSL_SENT'/'CST_QSL_RCVD'/'CST_QSL_REQUEST'
+        cst_generic_sent = F"CST_{option}_SENT"
         cst_generic_rcvd = F"CST_{option}_RCVD"
         cst_generic_request = F"CST_{option}_REQUEST"
 
         # Values holen, true or false
-        cst_card_send = single_qso_dict.get(cst_generic_send)
+        cst_card_sent = single_qso_dict.get(cst_generic_sent)
         cst_card_rcvd = single_qso_dict.get(cst_generic_rcvd)
         cst_card_request = single_qso_dict.get(cst_generic_request)
 
-        # 'CARD_SEND'/'CARD_RCVD'
-        Option_SEND = F"{option}_SEND"
+        # 'QSL_SENT'/'QSL_RCVD'
+        Option_SENT = F"{option}_SENT"
         Option_RCVD = F"{option}_RCVD"
 
         # Don't Touch Fields if nothing changed
-        if cst_card_send or cst_card_rcvd or cst_card_request:
+        if cst_card_sent or cst_card_rcvd or cst_card_request:
 
-            single_qso_dict.update({Option_SEND: 'N'})
+            single_qso_dict.update({Option_SENT: 'N'})
             single_qso_dict.update({Option_RCVD: 'N'})
 
-            if cst_card_send and cst_card_request:
-                single_qso_dict.update({Option_SEND: 'Y'})
+            if cst_card_sent and cst_card_request:
+                single_qso_dict.update({Option_SENT: 'Y'})
                 single_qso_dict.update({Option_RCVD: 'R'})
 
             elif cst_card_rcvd and cst_card_request:
                 single_qso_dict.update({Option_RCVD: 'Y'})
-                single_qso_dict.update({Option_SEND: 'Q'})
+                single_qso_dict.update({Option_SENT: 'Q'})
 
             else:
                 if cst_card_request:
-                    single_qso_dict.update({Option_SEND: 'Q'})
-                if cst_card_send:
-                    single_qso_dict.update({Option_SEND: 'Y'})
+                    single_qso_dict.update({Option_SENT: 'Q'})
+                if cst_card_sent:
+                    single_qso_dict.update({Option_SENT: 'Y'})
                 if cst_card_rcvd:
                     single_qso_dict.update({Option_RCVD: 'Y'})
 

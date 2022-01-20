@@ -51,7 +51,7 @@ class SaveAndLoadToFileTest(TestCase):
         mock.assert_called_once_with("someFile.adif", "some_Data", "IgnoreFiles")
 
     # Check if the Method gets Called Correctly
-    @patch("KissXPLog.kiss_xp_log.QFileDialog")
+    @patch("KissXPLog.file_operations.QFileDialog")
     def test_adif_load_file_chooser(self, mock_my_class):
         my_adi_file = "some_file.adi"
 
@@ -63,7 +63,7 @@ class SaveAndLoadToFileTest(TestCase):
         mock_self.generic_load_file_to_table.assert_called_once_with(my_adi_file)
 
     # Check if the Method gets Called Correctly
-    @patch("KissXPLog.kiss_xp_log.QFileDialog")
+    @patch("KissXPLog.file_operations.QFileDialog")
     def test_adi_load_file_chooser(self, mock_my_class):
         my_adi_file = "some_file.adif"
 
@@ -75,7 +75,7 @@ class SaveAndLoadToFileTest(TestCase):
         mock_self.generic_load_file_to_table.assert_called_once_with(my_adi_file)
 
     # Check if the Method gets Called Correctly
-    @patch("KissXPLog.kiss_xp_log.QFileDialog")
+    @patch("KissXPLog.file_operations.QFileDialog")
     def test_json_load_file_chooser(self, mock_my_class):
         my_adi_file = "some_file.json"
         mc = mock_my_class.return_value

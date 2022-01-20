@@ -52,8 +52,8 @@ class TestJsonFileHandling(unittest.TestCase):
         self.window.ui.timeEdit.setTime(QTime.fromString("113653", "HHmmss"))
         self.window.ui.le_freq.setText("182500")
         self.window.ui.cb_mode.setCurrentIndex(self.window.ui.cb_mode.findText("FT8"))
-        self.window.ui.le_rst_send.setText("15")
-        self.window.ui.le_rst_rcvt.setText("10")
+        self.window.ui.le_rst_sent.setText("15")
+        self.window.ui.le_rst_rcvd.setText("10")
 
     def test_add_new_record_with_json_export(self):
         # Create JSON for the test:

@@ -12,6 +12,9 @@ from KissXPLog.config import *
 
 class FileChooserTests(TestCase):
 
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
     # Check if Saving is working with Choose Dialog
     def test_int_json_save_file_chooser(self):
         import KissXPLog
