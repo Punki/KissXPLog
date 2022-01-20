@@ -45,7 +45,7 @@
        </widget>
       </item>
       <item row="7" column="4">
-       <widget class="QLineEdit" name="le_rst_rcvt">
+       <widget class="QLineEdit" name="le_rst_rcvd">
         <property name="minimumSize">
          <size>
           <width>80</width>
@@ -91,19 +91,19 @@
        </spacer>
       </item>
       <item row="6" column="3">
-       <widget class="QLabel" name="lb_rst_send">
+       <widget class="QLabel" name="lb_rst_sent">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>RST Send:</string>
+         <string>RST Sent:</string>
         </property>
        </widget>
       </item>
       <item row="6" column="4">
-       <widget class="QLineEdit" name="le_rst_send">
+       <widget class="QLineEdit" name="le_rst_sent">
         <property name="maximumSize">
          <size>
           <width>80</width>
@@ -318,7 +318,7 @@
          </widget>
         </item>
         <item row="4" column="0">
-         <widget class="QCheckBox" name="cb_card_send">
+         <widget class="QCheckBox" name="cb_card_sent">
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -331,7 +331,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Send</string>
+           <string>Sent</string>
           </property>
          </widget>
         </item>
@@ -384,7 +384,7 @@
          </widget>
         </item>
         <item row="4" column="2">
-         <widget class="QCheckBox" name="cb_eqsl_send">
+         <widget class="QCheckBox" name="cb_eqsl_sent">
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -397,7 +397,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Send</string>
+           <string>Sent</string>
           </property>
          </widget>
         </item>
@@ -427,7 +427,7 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QCheckBox" name="cb_lotw_send">
+         <widget class="QCheckBox" name="cb_lotw_sent">
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -440,7 +440,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Send</string>
+           <string>Sent</string>
           </property>
          </widget>
         </item>
@@ -597,14 +597,14 @@
        </widget>
       </item>
       <item row="7" column="3">
-       <widget class="QLabel" name="lb_rst_rcvt">
+       <widget class="QLabel" name="lb_rst_rcvd">
         <property name="font">
          <font>
           <pointsize>12</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>RST RCVT:</string>
+         <string>RST RCVD:</string>
         </property>
        </widget>
       </item>

@@ -42,7 +42,7 @@ Z.B: `<call:5>AAAAA`
 * UTC Time
 * Frequency
 * Mode
-* RST Send/Rst RCVD
+* RST Sent/Rst RCVD
 
 # Building
 
@@ -85,13 +85,13 @@ Mehrere dieser Dictionary's werden in einer Liste zusammengefasst:
 ### Custom Fields
 
 - `CST_CARD_RCVD` --> Card Received
-- `CST_CARD_SEND` --> Card Sent  
+- `CST_CARD_SENT` --> Card Sent  
 - `CST_CARD_REQUEST` --> Card Requested  
 - `CST_EQSL_RCVD` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Received  
-- `CST_EQSL_SEND` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Sent  
+- `CST_EQSL_SENT` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Sent  
 - `CST_EQSL_REQUEST` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Requested  
 - `CST_LOTW_RCVD` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Received  
-- `CST_LOTW_SEND` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Sent  
+- `CST_LOTW_SENT` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Sent  
 - `CST_LOTW_REQUEST` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Requested  
 
 Diese werden für die Interne QSO Verwaltung benötigt und nicht exportiert. CST Custom Fields werden vom UI genommen und
@@ -106,11 +106,11 @@ Die Felder können die folgenden Stati haben:
 
 #### Mapping-Beispiele
 Spezial Mapping Adif to Custom: \
-- Case 1: Send + Request = SEND[Y],RCVD[R]\
-- Case 2: Rcvd + Request = RCVD[Y],SEND[Q]\
-- Case 3: Send = SEND[Y]\
+- Case 1: Sent + Request = SENT[Y],RCVD[R]\
+- Case 2: Rcvd + Request = RCVD[Y],SENT[Q]\
+- Case 3: Sent = SENT[Y]\
 - Case 4: Rcvd = RCVD[Y]\
-- Case 5: Request = SEND[Q]
+- Case 5: Request = SENT[Q]
 
 # Bedienung:
 

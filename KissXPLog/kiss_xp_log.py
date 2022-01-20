@@ -33,13 +33,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.row = None
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'RST_SENT', 'RST_RCVD', 'DXCC',
-                          'COUNTRY', 'CARD_SEND', 'CARD_RCVD', 'EQSL_SEND', 'EQSL_RCVD', 'LOTW_SEND', 'LOTW_RCVD',
+                          'COUNTRY', 'CARD_SENT', 'CARD_RCVD', 'EQSL_SENT', 'EQSL_RCVD', 'LOTW_SENT', 'LOTW_RCVD',
                           'NOTES']
 
         self.bands = ['', '160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m']
         self.modes = ['', 'SSB', 'CW', 'FT8']
-        self.custom_fields_list = ['CST_CARD_RCVD', 'CST_CARD_SEND', 'CST_CARD_REQUEST', 'CST_EQSL_RCVD',
-                                   'CST_EQSL_SEND', 'CST_EQSL_REQUEST', 'CST_LOTW_RCVD', 'CST_LOTW_SEND',
+        self.custom_fields_list = ['CST_CARD_RCVD', 'CST_CARD_SENT', 'CST_CARD_REQUEST', 'CST_EQSL_RCVD',
+                                   'CST_EQSL_SENT', 'CST_EQSL_REQUEST', 'CST_LOTW_RCVD', 'CST_LOTW_SENT',
                                    'CST_LOTW_REQUEST']
 
         self.model = TableModel(self.data, self.row_index)
@@ -161,22 +161,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    'QSO_DATE': self.ui.dateEdit.date().toString("yyyyMMdd"),
                    'TIME_ON': self.ui.timeEdit.time().toString("HHmmss"),
                    'MODE': self.ui.cb_mode.currentText(),
-                   'RST_SENT': self.ui.le_rst_send.text(),
-                   'RST_RCVD': self.ui.le_rst_rcvt.text(),
+                   'RST_SENT': self.ui.le_rst_sent.text(),
+                   'RST_RCVD': self.ui.le_rst_rcvd.text(),
                    'BAND': self.ui.cb_band.currentText(),
                    'FREQ': self.ui.le_freq.text(),
                    'NOTES': self.ui.te_notes.toPlainText(),
 
                    'CST_CARD_RCVD': self.ui.cb_card_rcvd.isChecked(),
-                   'CST_CARD_SEND': self.ui.cb_card_send.isChecked(),
+                   'CST_CARD_SENT': self.ui.cb_card_sent.isChecked(),
                    'CST_CARD_REQUEST': self.ui.cb_card_request.isChecked(),
 
                    'CST_EQSL_RCVD': self.ui.cb_eqsl_rcvd.isChecked(),
-                   'CST_EQSL_SEND': self.ui.cb_eqsl_send.isChecked(),
+                   'CST_EQSL_SENT': self.ui.cb_eqsl_sent.isChecked(),
                    'CST_EQSL_REQUEST': self.ui.cb_eqsl_request.isChecked(),
 
                    'CST_LOTW_RCVD': self.ui.cb_lotw_rcvd.isChecked(),
-                   'CST_LOTW_SEND': self.ui.cb_lotw_send.isChecked(),
+                   'CST_LOTW_SENT': self.ui.cb_lotw_sent.isChecked(),
                    'CST_LOTW_REQUEST': self.ui.cb_lotw_request.isChecked(),
 
                    'COUNTRY': self.ui.le_country.text()
@@ -200,20 +200,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_qso = False
         self.ui.le_call.clear()
         self.ui.cb_mode.setCurrentIndex(0)
-        self.ui.le_rst_send.clear()
-        self.ui.le_rst_rcvt.clear()
+        self.ui.le_rst_sent.clear()
+        self.ui.le_rst_rcvd.clear()
         self.ui.cb_band.setCurrentIndex(0)
         self.ui.le_freq.clear()
         self.ui.te_notes.clear()
         self.ui.le_country.clear()
         self.ui.cb_card_rcvd.setChecked(False)
-        self.ui.cb_card_send.setChecked(False)
+        self.ui.cb_card_sent.setChecked(False)
         self.ui.cb_card_request.setChecked(False)
         self.ui.cb_eqsl_rcvd.setChecked(False)
-        self.ui.cb_eqsl_send.setChecked(False)
+        self.ui.cb_eqsl_sent.setChecked(False)
         self.ui.cb_eqsl_request.setChecked(False)
         self.ui.cb_lotw_rcvd.setChecked(False)
-        self.ui.cb_lotw_send.setChecked(False)
+        self.ui.cb_lotw_sent.setChecked(False)
         self.ui.cb_lotw_request.setChecked(False)
         self.update_date_and_time_for_new_qso()
 
@@ -308,21 +308,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.dateEdit.setDate(QDate.fromString(edit_QSO_dict.get('QSO_DATE'), "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString(edit_QSO_dict.get('TIME_ON'), "HHmmss"))
         self.ui.cb_mode.setCurrentText(edit_QSO_dict.get('MODE'))
-        self.ui.le_rst_send.setText(edit_QSO_dict.get('RST_SENT'))
-        self.ui.le_rst_rcvt.setText(edit_QSO_dict.get('RST_RCVD'))
+        self.ui.le_rst_sent.setText(edit_QSO_dict.get('RST_SENT'))
+        self.ui.le_rst_rcvd.setText(edit_QSO_dict.get('RST_RCVD'))
         self.ui.cb_band.setCurrentText(edit_QSO_dict.get('BAND'))
         self.ui.le_freq.setText(edit_QSO_dict.get('FREQ'))
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
 
         self.ui.cb_card_rcvd.setChecked(True if edit_QSO_dict.get('CST_CARD_RCVD') else False)
-        self.ui.cb_card_send.setChecked(True if edit_QSO_dict.get('CST_CARD_SEND') else False)
+        self.ui.cb_card_sent.setChecked(True if edit_QSO_dict.get('CST_CARD_SENT') else False)
         self.ui.cb_card_request.setChecked(True if edit_QSO_dict.get('CST_CARD_REQUEST') else False)
         self.ui.cb_eqsl_rcvd.setChecked(True if edit_QSO_dict.get('CST_EQSL_RCVD') else False)
-        self.ui.cb_eqsl_send.setChecked(True if edit_QSO_dict.get('CST_EQSL_SEND') else False)
+        self.ui.cb_eqsl_sent.setChecked(True if edit_QSO_dict.get('CST_EQSL_SENT') else False)
         self.ui.cb_eqsl_request.setChecked(True if edit_QSO_dict.get('CST_EQSL_REQUEST') else False)
         self.ui.cb_lotw_rcvd.setChecked(True if edit_QSO_dict.get('CST_LOTW_RCVD') else False)
-        self.ui.cb_lotw_send.setChecked(True if edit_QSO_dict.get('CST_LOTW_SEND') else False)
+        self.ui.cb_lotw_sent.setChecked(True if edit_QSO_dict.get('CST_LOTW_SENT') else False)
         self.ui.cb_lotw_request.setChecked(True if edit_QSO_dict.get('CST_LOTW_REQUEST') else False)
 
     def update_qso_status(self):
