@@ -23,6 +23,7 @@ def logging_setup(logfile):
         datefmt='%m/%d/%Y %H:%M:%S'  # datetime format: 03/26/2019 13:59:09
     )
 
+
 def show_info_message(title, message):
     msg_box = QtWidgets.QMessageBox()
     msg_box.setIcon(QMessageBox.Icon.Information)

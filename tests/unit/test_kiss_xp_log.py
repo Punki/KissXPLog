@@ -66,7 +66,7 @@ class MinimalQSODataPresent(TestCase):
     # UTC Time
     # Frequency
     # Mode
-    # RST Send / RST RCVD
+    # RST Sent / RST RCVD
     # {"CALL": "AAA", "QSO_DATE": "20200117", "TIME_ON": "182500", "FREQ": "7.012345", "MODE": "FT8", "RST_SENT": "-15","RST_RCVD": "-15"}
     def test_all_fields_no_data(self):
         empty_qso = {"CALL": "", "QSO_DATE": "", "TIME_ON": "", "FREQ": "", "MODE": "", "RST_SENT": "", "RST_RCVD": ""}
