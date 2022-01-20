@@ -1,5 +1,13 @@
-import sys
 import logging
+import os
+import sys
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+
+# module_path = os.path.abspath(os.getcwd())
+# if module_path not in sys.path:
+#     sys.path.append(module_path)
 
 from PyQt5 import QtWidgets
 

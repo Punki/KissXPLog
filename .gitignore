@@ -4,11 +4,11 @@
 **/core
 
 /KissXPLog/data/*
+/build/*
+/dist/*
 /KissXPLog/KissXPLog.log
 
 #Personal Stuff
-/KissXPLog/scratch.py
-/htmlcov/
-/.coverage
-/KissXPLog/temp/
 /KissXPLog/data/
+/KissXPLog/build_stuff/*/
+
