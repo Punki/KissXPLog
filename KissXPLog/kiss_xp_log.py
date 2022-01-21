@@ -13,6 +13,30 @@ from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_
 from KissXPLog.table_model import TableModel
 
 
+def get_band_with_frequencies():
+    # band: [low_feq, high_freq]
+    band_with_frequencies = {"160m": [1.81, 2.0], "80m": [3.5, 3.8], "40m": [7, 7.2], "30m": [10.1, 10.15],
+                             "20m": [14, 14.35], "17m": [18.068, 18.168], "15m": [21, 21.45],
+                             "12m": [24.89, 24.99],
+                             "10m": [28, 29.7]}
+    return band_with_frequencies
+
+
+def frequency_to_band(MHz_to_check):
+    try:
+        MHz_to_check = float(MHz_to_check)
+        for band in get_band_with_frequencies().keys():
+            if get_band_with_frequencies().get(band)[0] <= MHz_to_check <= get_band_with_frequencies().get(band)[1]:
+                return band
+    except ValueError as e:
+        logging.error("Could not convert 'MHz_to_check' to float: {0}".format(e))
+
+
+def band_to_frequency(band):
+    if band in get_band_with_frequencies().keys():
+        return get_band_with_frequencies().get(band)[0]
+
+
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -36,7 +60,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                           'COUNTRY', 'CARD_SENT', 'CARD_RCVD', 'EQSL_SENT', 'EQSL_RCVD', 'LOTW_SENT', 'LOTW_RCVD',
                           'NOTES']
 
-        self.bands = ['', '160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m']
+        # self.bands = ['', '160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m']
+        self.bands = ['']
+        self.bands.extend(get_band_with_frequencies().keys())
+
         self.modes = ['', 'SSB', 'CW', 'FT8']
         self.custom_fields_list = ['CST_CARD_RCVD', 'CST_CARD_SENT', 'CST_CARD_REQUEST', 'CST_EQSL_RCVD',
                                    'CST_EQSL_SENT', 'CST_EQSL_REQUEST', 'CST_LOTW_RCVD', 'CST_LOTW_SENT',
