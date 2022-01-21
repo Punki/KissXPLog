@@ -138,6 +138,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # helpMenu.addAction(self.aboutAction)
 
     def _connectActions(self):
+        #
+        # Fill some default values if Call is there
+        self.ui.le_call.editingFinished.connect(self.set_time_and_country_after_call)
+        self.ui.le_freq.textEdited.connect(self.set_band_from_frequency)
+        self.ui.cb_band.currentIndexChanged.connect(self.set_frequency_from_band)
+
         # Connect File actions
         self.saveAction.triggered.connect(self.json_save_file_chooser)
         self.loadAction.triggered.connect(self.json_load_file_chooser)
@@ -151,6 +157,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Connect Help actions
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
+
+    def set_time_and_country_after_call(self):
+        # Improvement for better User experience
+        # Todo: Make Function to get Country from Prefix
+        self.ui.le_country.setText("Todo")
+        # Set Time to this:
+        self.update_date_and_time_for_new_qso()
+
+    def set_frequency_from_band(self):
+        # check if freq is empty!
+        if not self.ui.le_freq.text():
+            band = self.ui.cb_band.currentText()
+            if band:
+                freq = band_to_frequency(band)
+                self.ui.le_freq.setText(str(freq))
+
+    def set_band_from_frequency(self):
+        freq = self.ui.le_freq.text()
+        self.ui.cb_band.setCurrentText(frequency_to_band(freq))
 
     def setColumnVisible(self, column, isChecked):
         if isChecked:
