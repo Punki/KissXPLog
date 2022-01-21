@@ -83,7 +83,7 @@ Im neuen venv werden die requirements jetzt mit `pip install -r requirements.txt
 
 GUI-Änderungen werden mit QT Designer im File [logger_gui.ui](KissXPLog/logger_gui.ui) gemacht.\
 Diese Änderungen werden mit folgendem Befehl kompiliert:\
-`pyuic5 -x new_logger.ui -o new_logger.py`
+`pyuic5 -x logger_gui.ui -o logger_gui.py`
 
 ## Files:
 Main: [kiss_xp_log.py](KissXPLog/kiss_xp_log.py) \
