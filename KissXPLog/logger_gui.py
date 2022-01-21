@@ -11,7 +11,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-# noinspection PyAttributeOutsideInit
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -59,12 +58,6 @@ class Ui_MainWindow(object):
         self.le_rst_sent.setFont(font)
         self.le_rst_sent.setObjectName("le_rst_sent")
         self.gridLayout.addWidget(self.le_rst_sent, 6, 4, 1, 1)
-        self.dateEdit = QtWidgets.QDateEdit(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.dateEdit.setFont(font)
-        self.dateEdit.setObjectName("dateEdit")
-        self.gridLayout.addWidget(self.dateEdit, 0, 4, 1, 2)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -97,6 +90,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(12)
         self.le_call.setFont(font)
+        self.le_call.setInputMethodHints(QtCore.Qt.ImhUppercaseOnly)
         self.le_call.setObjectName("le_call")
         self.gridLayout.addWidget(self.le_call, 0, 2, 1, 1)
         self.cb_mode = QtWidgets.QComboBox(self.centralwidget)
@@ -216,12 +210,6 @@ class Ui_MainWindow(object):
         self.lb_call_4.setFont(font)
         self.lb_call_4.setObjectName("lb_call_4")
         self.gridLayout.addWidget(self.lb_call_4, 5, 3, 1, 1)
-        self.timeEdit = QtWidgets.QTimeEdit(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.timeEdit.setFont(font)
-        self.timeEdit.setObjectName("timeEdit")
-        self.gridLayout.addWidget(self.timeEdit, 3, 4, 1, 2)
         self.le_freq = QtWidgets.QLineEdit(self.centralwidget)
         self.le_freq.setMaximumSize(QtCore.QSize(170, 16777215))
         font = QtGui.QFont()
@@ -261,6 +249,20 @@ class Ui_MainWindow(object):
         self.bt_new = QtWidgets.QPushButton(self.centralwidget)
         self.bt_new.setObjectName("bt_new")
         self.gridLayout.addWidget(self.bt_new, 3, 8, 1, 1)
+        self.timeEdit = QtWidgets.QTimeEdit(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.timeEdit.setFont(font)
+        self.timeEdit.setObjectName("timeEdit")
+        self.gridLayout.addWidget(self.timeEdit, 3, 4, 1, 2)
+        self.dateEdit = QtWidgets.QDateEdit(self.centralwidget)
+        self.dateEdit.setEnabled(True)
+        self.dateEdit.setMinimumSize(QtCore.QSize(110, 0))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.dateEdit.setFont(font)
+        self.dateEdit.setObjectName("dateEdit")
+        self.gridLayout.addWidget(self.dateEdit, 0, 4, 1, 2)
         self.verticalLayout.addLayout(self.gridLayout)
         self.tableView = QtWidgets.QTableView(self.centralwidget)
         self.tableView.setMinimumSize(QtCore.QSize(0, 291))
@@ -300,7 +302,7 @@ class Ui_MainWindow(object):
         self.cb_lotw_rcvd.setText(_translate("MainWindow", "RCVD"))
         self.cb_lotw_request.setText(_translate("MainWindow", "Requested"))
         self.label_3.setText(_translate("MainWindow", "LOTW:"))
-        self.lb_freq.setText(_translate("MainWindow", "Freq:"))
+        self.lb_freq.setText(_translate("MainWindow", "Freq (MHz):"))
         self.lb_call_4.setText(_translate("MainWindow", "Mode:"))
         self.lb_call_2.setText(_translate("MainWindow", "Band:"))
         self.bt_column_filter.setText(_translate("MainWindow", "Column Filter"))
@@ -311,7 +313,6 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
