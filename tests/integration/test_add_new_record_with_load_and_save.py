@@ -29,13 +29,24 @@ class TestJsonFileHandling(unittest.TestCase):
              "ITUZ": "28"},
             {"CALL": "CCC", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
              "ITUZ": "28"}]
-        self.expect = [
+        self.json_expect = [
             {"CALL": "AAA", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
              "ITUZ": "28"},
             {"CALL": "BBB", "QSO_DATE": "000000", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
              "ITUZ": "28"},
             {"CALL": "CCC", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
              "ITUZ": "28"},
+            {"CALL": "DDD", "QSO_DATE": "20220104", "TIME_ON": "113653", "MODE": "FT8", "RST_SENT": "15",
+             "RST_RCVD": "10", "FREQ": "182500"}]
+
+        # Same as above but with Frequency..
+        self.adi_expect = [
+            {"CALL": "AAA", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
+             "ITUZ": "28", "FREQ": "7"},
+            {"CALL": "BBB", "QSO_DATE": "000000", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
+             "ITUZ": "28", "FREQ": "7"},
+            {"CALL": "CCC", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
+             "ITUZ": "28", "FREQ": "7"},
             {"CALL": "DDD", "QSO_DATE": "20220104", "TIME_ON": "113653", "MODE": "FT8", "RST_SENT": "15",
              "RST_RCVD": "10", "FREQ": "182500"}]
 
@@ -74,7 +85,7 @@ class TestJsonFileHandling(unittest.TestCase):
         # Read File in for check
         result = read_data_from_json_file(self.json_outputfile_name2)
 
-        self.assertEqual(self.expect, result)
+        self.assertEqual(self.json_expect, result)
 
     def test_add_new_record_with_adif_export(self):
         # Write input File
@@ -95,4 +106,4 @@ class TestJsonFileHandling(unittest.TestCase):
 
         result = parse_adif_for_data(self.adif_outputfile_name2)
 
-        self.assertEqual(self.expect, result)
+        self.assertEqual(self.adi_expect, result)

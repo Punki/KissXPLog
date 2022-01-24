@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from KissXPLog.adif import remove_header_from_file, qso_status_from_adif_to_custom_mapping, \
-    qso_status_from_custom_to_adif_mapping, fix_time_without_seconds
+    qso_status_from_custom_to_adif_mapping, fix_time_without_seconds, fix_band_and_freq_when_one_of_them_is_available
 
 
 class RemoveHeaderFromAdif(TestCase):
@@ -246,6 +246,26 @@ class MappingCustomToAdifStatusLOTW(TestCase):
 
 class CommonImportProblems(TestCase):
     def test_convert_time_from_four_to_six_digits(self):
-        single_qso_dict_input = {"TIME_ON": "1555"}
         expect = {"TIME_ON": "155500"}
-        self.assertDictEqual(expect, fix_time_without_seconds(single_qso_dict_input))
+        self.assertDictEqual(expect, fix_time_without_seconds({"TIME_ON": "1555"}))
+
+    def test_do_nothing_if_freq_and_band(self):
+        expected = {"FREQ": "7.012345", "BAND": "40m"}
+        result = fix_band_and_freq_when_one_of_them_is_available(expected)
+        self.assertEqual(expected, result)
+
+    def test_edit_freq_if_band(self):
+        expected = {"BAND": "40m", "FREQ": "7"}
+        self.assertEqual(expected, fix_band_and_freq_when_one_of_them_is_available({"BAND": "40m"}))
+
+    def test_edit_freq_if_band_case_sensitive(self):
+        expected = {"BAND": "40M", "FREQ": "7"}
+        self.assertEqual(expected, fix_band_and_freq_when_one_of_them_is_available({"BAND": "40M"}))
+
+    def test_edit_band_if_freq(self):
+        expected = {"FREQ": "7.012345", "BAND": "40m"}
+        self.assertEqual(expected, fix_band_and_freq_when_one_of_them_is_available({"FREQ": "7.012345"}))
+
+    def test_do_nothing_in_case_no_feq_and_no_band(self):
+        expected = {}
+        self.assertEqual(expected, fix_band_and_freq_when_one_of_them_is_available({}))

@@ -3,38 +3,15 @@ from functools import partial
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
-from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog
+from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog.adif import qso_status_from_custom_to_adif_mapping, parse_adif_for_data
+from KissXPLog.adif import qso_status_from_custom_to_adif_mapping, parse_adif_for_data, get_band_with_frequencies, \
+    band_to_frequency, frequency_to_band
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list
 from KissXPLog.table_model import TableModel
-
-
-def get_band_with_frequencies():
-    # band: [low_feq, high_freq]
-    band_with_frequencies = {"160m": [1.81, 2.0], "80m": [3.5, 3.8], "40m": [7, 7.2], "30m": [10.1, 10.15],
-                             "20m": [14, 14.35], "17m": [18.068, 18.168], "15m": [21, 21.45],
-                             "12m": [24.89, 24.99],
-                             "10m": [28, 29.7]}
-    return band_with_frequencies
-
-
-def frequency_to_band(MHz_to_check):
-    try:
-        MHz_to_check = float(MHz_to_check)
-        for band in get_band_with_frequencies().keys():
-            if get_band_with_frequencies().get(band)[0] <= MHz_to_check <= get_band_with_frequencies().get(band)[1]:
-                return band
-    except ValueError as e:
-        logging.error("Could not convert 'MHz_to_check' to float: {0}".format(e))
-
-
-def band_to_frequency(band):
-    if band in get_band_with_frequencies().keys():
-        return get_band_with_frequencies().get(band)[0]
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -52,9 +29,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.table_is_editable = False
         self.data = []
 
+        # Bool for New oder Update
         self.update_qso = False
-        self.org_qso = None
+        # Which row should be Updated
         self.row = None
+        self.do_we_have_unsaved_changes = False
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'RST_SENT', 'RST_RCVD', 'DXCC',
                           'COUNTRY', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT',
@@ -180,8 +159,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def set_time_and_country_after_call(self):
         # Improvement for better User experience
         # Todo: Make Function to get Country from Prefix
-        if not self.ui.le_country.text():
-            self.ui.le_country.setText("Todo")
+        # if not self.ui.le_country.text():
+        # self.ui.le_country.setText("Todo")
         # Set Time to this:
         if self.ui.timeEdit.time().toString("HHmmss") == '000000':
             if self.ui.dateEdit.date().toString("yyyyMMdd") == '20000101':
@@ -190,8 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def set_frequency_from_band(self):
         # check if freq is empty!
         if not self.ui.le_freq.text():
-            band = self.ui.cb_band.currentText()
-            if band:
+            if band := self.ui.cb_band.currentText():
                 freq = band_to_frequency(band)
                 self.ui.le_freq.setText(str(freq))
 
@@ -332,6 +310,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File will be saved to {filename}")
             generic_save_data_to_file(filename, self.model.get_data_from_table())
+            self.do_we_have_unsaved_changes = False
+            return True
 
     def json_load_file_chooser(self):
         logging.debug("Open File Select for Load in JSON")
@@ -353,6 +333,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"ADIF File {filename} will be exported")
             generic_save_data_to_file(filename, self.model.get_data_from_table(), self.custom_fields_list)
+            self.do_we_have_unsaved_changes = False
 
     def adif_load_file_chooser(self):
         logging.debug("Open File Select for Import in Adif")
@@ -370,11 +351,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         new_row = self.proxyModel.mapToSource(index).row()
         edit_QSO_dict = self.model.get_data_row_from_table(new_row)
         self.update_qso = True
-        self.org_qso = edit_QSO_dict
         self.row = new_row
         self.fill_values_to_edit_form(edit_QSO_dict)
 
     def save_or_edit_handler(self):
+        # Called by SaveButton
+        self.do_we_have_unsaved_changes = True
         if self.update_qso:
             self.update_qso = False
             updated_qso = self.get_dict_from_inputform()
@@ -407,7 +389,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_sent.setChecked(True if edit_QSO_dict.get('CST_LOTW_QSL_SENT') else False)
         self.ui.cb_lotw_request.setChecked(True if edit_QSO_dict.get('CST_LOTW_QSL_REQUEST') else False)
 
-    def update_qso_status(self):
-        self.update_qso = False
-        self.org_qso = None
-        self.row = None
+    def closeEvent(self, event):
+        if self.do_we_have_unsaved_changes:
+            reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                if self.json_save_file_chooser():
+                    event.accept()
+                else:
+                    event.ignore()
