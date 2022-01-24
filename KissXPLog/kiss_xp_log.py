@@ -57,7 +57,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.row = None
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'RST_SENT', 'RST_RCVD', 'DXCC',
-                          'COUNTRY', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD',
+                          'COUNTRY', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT',
+                          'LOTW_QSL_RCVD',
                           'NOTES']
 
         # self.bands = ['', '160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m']
@@ -66,7 +67,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.modes = ['', 'SSB', 'CW', 'FT8']
         self.custom_fields_list = ['CST_QSL_RCVD', 'CST_QSL_SENT', 'CST_QSL_REQUEST', 'CST_EQSL_QSL_RCVD',
-                                   'CST_EQSL_QSL_SENT', 'CST_EQSL_QSL_REQUEST', 'CST_LOTW_QSL_RCVD', 'CST_LOTW_QSL_SENT',
+                                   'CST_EQSL_QSL_SENT', 'CST_EQSL_QSL_REQUEST', 'CST_LOTW_QSL_RCVD',
+                                   'CST_LOTW_QSL_SENT',
                                    'CST_LOTW_QSL_REQUEST']
 
         self.model = TableModel(self.data, self.row_index)
@@ -390,7 +392,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.setCurrentText(edit_QSO_dict.get('MODE'))
         self.ui.le_rst_sent.setText(edit_QSO_dict.get('RST_SENT'))
         self.ui.le_rst_rcvd.setText(edit_QSO_dict.get('RST_RCVD'))
-        self.ui.cb_band.setCurrentText(edit_QSO_dict.get('BAND'))
+        self.ui.cb_band.setCurrentText(edit_QSO_dict.get('BAND').lower())
         self.ui.le_freq.setText(edit_QSO_dict.get('FREQ'))
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))

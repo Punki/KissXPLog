@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from KissXPLog.adif import remove_header_from_file, qso_status_from_adif_to_custom_mapping, \
-    qso_status_from_custom_to_adif_mapping
+    qso_status_from_custom_to_adif_mapping, fix_time_without_seconds
 
 
 class RemoveHeaderFromAdif(TestCase):
@@ -242,3 +242,10 @@ class MappingCustomToAdifStatusLOTW(TestCase):
 
         result = qso_status_from_custom_to_adif_mapping(single_qso_dict_input)
         self.assertEqual(expect, result)
+
+
+class CommonImportProblems(TestCase):
+    def test_convert_time_from_four_to_six_digits(self):
+        single_qso_dict_input = {"TIME_ON": "1555"}
+        expect = {"TIME_ON": "155500"}
+        self.assertDictEqual(expect, fix_time_without_seconds(single_qso_dict_input))
