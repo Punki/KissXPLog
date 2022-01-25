@@ -1,9 +1,9 @@
 import logging
 import re
 
-
 # todo Exception handling
 # verify Adif Data
+from KissXPLog.static_adif_fields import BAND_WITH_FREQUENCY
 
 
 def parse_adif_for_data(filename):
@@ -116,20 +116,11 @@ def split_single_QSO(single_raw_qso):
     return single_qso_dict
 
 
-def get_band_with_frequencies():
-    # band: [low_feq, high_freq]
-    band_with_frequencies = {"160m": [1.81, 2.0], "80m": [3.5, 3.8], "40m": [7, 7.2], "30m": [10.1, 10.15],
-                             "20m": [14, 14.35], "17m": [18.068, 18.168], "15m": [21, 21.45],
-                             "12m": [24.89, 24.99],
-                             "10m": [28, 29.7]}
-    return band_with_frequencies
-
-
 def frequency_to_band(MHz_to_check):
     try:
         MHz_to_check = float(MHz_to_check)
-        for band in get_band_with_frequencies().keys():
-            if get_band_with_frequencies().get(band)[0] <= MHz_to_check <= get_band_with_frequencies().get(band)[1]:
+        for band in BAND_WITH_FREQUENCY:
+            if BAND_WITH_FREQUENCY.get(band)[0] <= MHz_to_check <= BAND_WITH_FREQUENCY.get(band)[1]:
                 return band
     except ValueError as e:
         logging.error("Could not convert 'MHz_to_check' to float: {0}".format(e))
@@ -137,8 +128,8 @@ def frequency_to_band(MHz_to_check):
 
 def band_to_frequency(band):
     band = str(band).lower()
-    if band in get_band_with_frequencies().keys():
-        return get_band_with_frequencies().get(band)[0]
+    if band in BAND_WITH_FREQUENCY:
+        return BAND_WITH_FREQUENCY.get(band)[0]
 
 
 def fix_time_without_seconds(single_qso_dict):

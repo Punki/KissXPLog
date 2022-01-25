@@ -255,11 +255,11 @@ class CommonImportProblems(TestCase):
         self.assertEqual(expected, result)
 
     def test_edit_freq_if_band(self):
-        expected = {"BAND": "40m", "FREQ": "7"}
+        expected = {"BAND": "40m", "FREQ": "7.0"}
         self.assertEqual(expected, fix_band_and_freq_when_one_of_them_is_available({"BAND": "40m"}))
 
     def test_edit_freq_if_band_case_sensitive(self):
-        expected = {"BAND": "40M", "FREQ": "7"}
+        expected = {"BAND": "40M", "FREQ": "7.0"}
         self.assertEqual(expected, fix_band_and_freq_when_one_of_them_is_available({"BAND": "40M"}))
 
     def test_edit_band_if_freq(self):
