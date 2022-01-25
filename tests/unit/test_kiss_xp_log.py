@@ -112,12 +112,10 @@ class MappingBandsAndFrequency(TestCase):
         self.assertEqual("12m", frequency_to_band(24.99))
         self.assertEqual("10m", frequency_to_band(29.7))
 
-
-
     def test_out_of_range_values(self):
-        self.assertEqual(None, frequency_to_band(1.8))
+        self.assertEqual(None, frequency_to_band(1.7))
         self.assertEqual(None, frequency_to_band(29.8))
-        self.assertEqual(None, frequency_to_band(0))
+        self.assertEqual('', frequency_to_band(0))
 
     def test_negative_value(self):
         self.assertEqual(None, frequency_to_band(-14))
@@ -134,7 +132,7 @@ class MappingBandsAndFrequency(TestCase):
         self.assertEqual("10m", frequency_to_band("28"))
 
     def test_band_to_frequency(self):
-        self.assertEqual(1.81, band_to_frequency("160m"))
+        self.assertEqual(1.8, band_to_frequency("160m"))
         self.assertEqual(3.5, band_to_frequency("80m"))
         self.assertEqual(7, band_to_frequency("40m"))
         self.assertEqual(10.1, band_to_frequency("30m"))
@@ -149,5 +147,3 @@ class MappingBandsAndFrequency(TestCase):
 
     def test_not_string_frequency(self):
         self.assertEqual(None, band_to_frequency(20))
-
-
