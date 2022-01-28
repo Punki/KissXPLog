@@ -1,11 +1,12 @@
 import json
 import logging
+import re
 
 from PyQt5.QtWidgets import QFileDialog
 
 from KissXPLog.adif import export_to_adif
 from KissXPLog.messages import show_error_message
-from KissXPLog.config import *
+from KissXPLog.config import data_dir
 
 
 def initial_file_dialog_config(file_extension):
@@ -28,8 +29,8 @@ def initial_file_dialog_config(file_extension):
 
 def generic_save_data_to_file(filename, data_to_write, exclude_fields=None):
     logging.debug(f"Save table to: {filename}.")
-    # Todo Add saver way for > [0]
-    file_extension = str(filename).strip().split(".", 1)[1]
+    file_extension = str(filename).strip()
+    file_extension = re.search('\w*$', file_extension).group(0)
     if file_extension == "json":
         write_file_as_json(filename, data_to_write)
     elif file_extension == "adi" or file_extension == "adif":
@@ -40,6 +41,7 @@ def generic_save_data_to_file(filename, data_to_write, exclude_fields=None):
 
 
 def read_data_from_json_file(file_to_read_from):
+    data={}
     try:
         with open(file_to_read_from, "r") as json_file:
             data = json.load(json_file)
@@ -49,8 +51,6 @@ def read_data_from_json_file(file_to_read_from):
         show_error_message("Error", "Access Denied to file: {}.".format(file_to_read_from))
     except IOError:
         show_error_message("Error", "IO Error.")
-    except Exception as e:
-        show_error_message("Error", "IDK man, something went wrong: {}".format(e))
     return data
 
 
