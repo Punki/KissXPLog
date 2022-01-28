@@ -1,3 +1,16 @@
+QSL_RCVD_ENUMERATION = {'': ('',),
+                        'Yes': ('Y',),
+                        'No': ('N',),
+                        'Requested': ('R',),
+                        'ignore or invalid': ('I',)}
+
+QSL_SENT_ENUMERATION = {'': ('',),
+                        'Yes': ('Y',),
+                        'No': ('N',),
+                        'Requested': ('R',),
+                        'Queued': ('Q',),
+                        'ignore or invalid': ('I',)}
+
 MODES_WITH_SUBMODE = {'': ('',),
                       'AM': ('',),
                       'ARDOP': ('',),
