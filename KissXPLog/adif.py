@@ -3,7 +3,7 @@ import re
 
 # todo Exception handling
 # verify Adif Data
-from KissXPLog.static_adif_fields import BAND_WITH_FREQUENCY
+from KissXPLog.const_adif_fields import BAND_WITH_FREQUENCY
 
 
 def parse_adif_for_data(filename):
