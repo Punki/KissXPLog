@@ -5,12 +5,13 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog.adif import qso_status_from_custom_to_adif_mapping, parse_adif_for_data, get_band_with_frequencies, \
-    band_to_frequency, frequency_to_band
+from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
+    frequency_to_band
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list
+from KissXPLog.static_adif_fields import *
 from KissXPLog.table_model import TableModel
 
 
@@ -18,7 +19,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
-        self.setup_ui = self.ui.setupUi(self)
+        self.ui.setupUi(self)
         # MenuBarStuff
         self._createActions()
         self._createMenuBar()
@@ -28,27 +29,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.table_is_editable = False
         self.data = []
-
         # Bool for New oder Update
         self.update_qso = False
         # Which row should be Updated
         self.row = None
         self.do_we_have_unsaved_changes = False
 
-        self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'RST_SENT', 'RST_RCVD', 'DXCC',
-                          'COUNTRY', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT',
-                          'LOTW_QSL_RCVD',
-                          'NOTES']
-
+        self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
+                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD',
+                          'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME', 'NOTES']
         # self.bands = ['', '160m', '80m', '40m', '30m', '20m', '17m', '15m', '12m', '10m']
-        self.bands = ['']
-        self.bands.extend(get_band_with_frequencies().keys())
+        self.bands = BAND_WITH_FREQUENCY
+        # self.cst_modes = ['', 'SSB', 'CW', 'FT8']
+        self.custom_fields_list = []
 
-        self.modes = ['', 'SSB', 'CW', 'FT8']
-        self.custom_fields_list = ['CST_QSL_RCVD', 'CST_QSL_SENT', 'CST_QSL_REQUEST', 'CST_EQSL_QSL_RCVD',
-                                   'CST_EQSL_QSL_SENT', 'CST_EQSL_QSL_REQUEST', 'CST_LOTW_QSL_RCVD',
-                                   'CST_LOTW_QSL_SENT',
-                                   'CST_LOTW_QSL_REQUEST']
+        self.modes = MODES_WITH_SUBMODE
+        self.cantons = CANTONS
 
         self.model = TableModel(self.data, self.row_index)
         self.proxyModel = QSortFilterProxyModel()
@@ -67,8 +63,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setWindowTitle("Kiss XP Log for QSO")
         # Anzeige von Text in Statusleiste Vorlage -> DEV
         self.ui.statusbar.showMessage("I'm the status bar - Hi, how are you? :)", 20000)
+
+        # Fill in Comboboxes
         self.ui.cb_band.addItems(self.bands)
         self.ui.cb_mode.addItems(self.modes)
+        self.ui.cb_canton.addItems(self.cantons)
+        self.ui.cbo_sent_options.addItems(QSL_SENT_ENUMERATION)
+        self.ui.cbo_rcvd_options.addItems(QSL_RCVD_ENUMERATION)
 
         self.ui.bt_new.clicked.connect(self.clear_new_log_entry_form)
         self.ui.bt_save.clicked.connect(self.save_or_edit_handler)
@@ -131,6 +132,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.currentIndexChanged.connect(self.set_default_rst)
         # Call should always be Uppercase
         self.ui.le_call.textChanged.connect(lambda: self.ui.le_call.setText(self.ui.le_call.text().upper()))
+        # Fill the Submodes from Mode select
+        self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
 
         # Connect File actions
         self.saveAction.triggered.connect(self.json_save_file_chooser)
@@ -145,6 +148,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Connect Help actions
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
+
+    def fill_in_sub_modes(self):
+        self.ui.cb_submodes.clear()
+        selected_mode = self.ui.cb_mode.currentText()
+        sub_mode = self.modes.get(selected_mode)
+        if len(sub_mode) <= 1:
+            self.ui.cb_submodes.setDisabled(True)
+        else:
+            self.ui.cb_submodes.setEnabled(True)
+            self.ui.cb_submodes.addItems(sub_mode)
 
     def set_default_rst(self):
         if not self.ui.le_rst_sent.text():
@@ -181,10 +194,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def setColumnVisible(self, column, isChecked):
         if isChecked:
             self.ui.tableView.showColumn(column)
-            logging.debug("Column {} set to shown".format(column))
+            logging.debug(f"Column {column} set to shown")
         else:
             self.ui.tableView.hideColumn(column)
-            logging.debug("Column {} set to hidden".format(column))
+            logging.debug(f"Column {column} set to hidden")
 
     def filter_for_table(self):
         text = self.ui.le_filter.text()
@@ -218,25 +231,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    'QSO_DATE': self.ui.dateEdit.date().toString("yyyyMMdd"),
                    'TIME_ON': self.ui.timeEdit.time().toString("HHmmss"),
                    'MODE': self.ui.cb_mode.currentText(),
+                   'SUBMODE': self.ui.cb_submodes.currentText(),
+
                    'RST_SENT': self.ui.le_rst_sent.text(),
                    'RST_RCVD': self.ui.le_rst_rcvd.text(),
                    'BAND': self.ui.cb_band.currentText(),
                    'FREQ': self.ui.le_freq.text(),
+                   'NAME': self.ui.le_name.text(),
                    'NOTES': self.ui.te_notes.toPlainText(),
+                   'COMMENT': self.ui.le_comment.text(),
+                   'QSL_RCVD': [i for i in QSL_RCVD_ENUMERATION.get(self.ui.cbo_rcvd_options.currentText())][0],
+                   'QSL_SENT': [i for i in QSL_SENT_ENUMERATION.get(self.ui.cbo_sent_options.currentText())][0],
 
-                   'CST_QSL_RCVD': self.ui.cb_card_rcvd.isChecked(),
-                   'CST_QSL_SENT': self.ui.cb_card_sent.isChecked(),
-                   'CST_QSL_REQUEST': self.ui.cb_card_request.isChecked(),
+                   'EQSL_QSL_RCVD': self.ui.cb_eqsl_rcvd_new.isChecked(),
+                   'EQSL_QSL_SENT': self.ui.cb_eqsl_sent_new.isChecked(),
 
-                   'CST_EQSL_QSL_RCVD': self.ui.cb_eqsl_rcvd.isChecked(),
-                   'CST_EQSL_QSL_SENT': self.ui.cb_eqsl_sent.isChecked(),
-                   'CST_EQSL_QSL_REQUEST': self.ui.cb_eqsl_request.isChecked(),
+                   'LOTW_QSL_RCVD': self.ui.cb_lotw_rcvd_new.isChecked(),
+                   'LOTW_QSL_SENT': self.ui.cb_lotw_sent_new.isChecked(),
 
-                   'CST_LOTW_QSL_RCVD': self.ui.cb_lotw_rcvd.isChecked(),
-                   'CST_LOTW_QSL_SENT': self.ui.cb_lotw_sent.isChecked(),
-                   'CST_LOTW_QSL_REQUEST': self.ui.cb_lotw_request.isChecked(),
-
-                   'COUNTRY': self.ui.le_country.text()
+                   'COUNTRY': self.ui.le_country.text(),
+                   'STATE': self.ui.cb_canton.currentText()
                    }
 
         return new_qso
@@ -246,8 +260,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         new_qso = remove_empty_fields(new_qso)
         if are_minimum_qso_data_present(new_qso):
             self.clear_new_log_entry_form()
-            qso_with_valid_adif_fields = qso_status_from_custom_to_adif_mapping(new_qso)
-            self.model.add_new_qso_method_two(qso_with_valid_adif_fields)
+            self.model.add_new_qso_method_two(new_qso)
             # self.model.add_new_qso_method_one(new_qso)
         else:
             # Todo Show Hint which fields needs to edit for a minimal qso.. (ggf roter Rahmen über felder oä)
@@ -257,21 +270,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_qso = False
         self.ui.le_call.clear()
         self.ui.cb_mode.setCurrentIndex(0)
+        self.ui.cb_submodes.clear()
         self.ui.le_rst_sent.clear()
         self.ui.le_rst_rcvd.clear()
         self.ui.cb_band.setCurrentIndex(0)
         self.ui.le_freq.clear()
+        self.ui.le_name.clear()
+        self.ui.le_comment.clear()
         self.ui.te_notes.clear()
         self.ui.le_country.clear()
-        self.ui.cb_card_rcvd.setChecked(False)
-        self.ui.cb_card_sent.setChecked(False)
-        self.ui.cb_card_request.setChecked(False)
-        self.ui.cb_eqsl_rcvd.setChecked(False)
-        self.ui.cb_eqsl_sent.setChecked(False)
-        self.ui.cb_eqsl_request.setChecked(False)
-        self.ui.cb_lotw_rcvd.setChecked(False)
-        self.ui.cb_lotw_sent.setChecked(False)
-        self.ui.cb_lotw_request.setChecked(False)
+        self.ui.cb_canton.setCurrentIndex(0)
+        self.ui.cbo_rcvd_options.setCurrentIndex(0)
+        self.ui.cbo_sent_options.setCurrentIndex(0)
+
+        self.ui.cb_eqsl_rcvd_new.setChecked(False)
+        self.ui.cb_eqsl_sent_new.setChecked(False)
+
+        self.ui.cb_lotw_rcvd_new.setChecked(False)
+        self.ui.cb_lotw_sent_new.setChecked(False)
+
         self.ui.dateEdit.setDate(QDate.fromString("20000101", "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString('000000', "HHmmss"))
 
@@ -372,22 +389,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.dateEdit.setDate(QDate.fromString(edit_QSO_dict.get('QSO_DATE'), "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString(edit_QSO_dict.get('TIME_ON'), "HHmmss"))
         self.ui.cb_mode.setCurrentText(edit_QSO_dict.get('MODE'))
+        self.ui.cb_submodes.setCurrentText(edit_QSO_dict.get('SUBMODE'))
         self.ui.le_rst_sent.setText(edit_QSO_dict.get('RST_SENT'))
         self.ui.le_rst_rcvd.setText(edit_QSO_dict.get('RST_RCVD'))
-        self.ui.cb_band.setCurrentText(edit_QSO_dict.get('BAND').lower())
+        self.ui.cb_band.setCurrentText(edit_QSO_dict.get('BAND').lower() if edit_QSO_dict.get('BAND') else "")
         self.ui.le_freq.setText(edit_QSO_dict.get('FREQ'))
+        self.ui.le_name.setText(edit_QSO_dict.get('NAME'))
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
+        self.ui.le_comment.setText(edit_QSO_dict.get('COMMENT'))
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
+        # Todo Check if County is Swiss
+        self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
 
-        self.ui.cb_card_rcvd.setChecked(True if edit_QSO_dict.get('CST_QSL_RCVD') else False)
-        self.ui.cb_card_sent.setChecked(True if edit_QSO_dict.get('CST_QSL_SENT') else False)
-        self.ui.cb_card_request.setChecked(True if edit_QSO_dict.get('CST_QSL_REQUEST') else False)
-        self.ui.cb_eqsl_rcvd.setChecked(True if edit_QSO_dict.get('CST_EQSL_QSL_RCVD') else False)
-        self.ui.cb_eqsl_sent.setChecked(True if edit_QSO_dict.get('CST_EQSL_QSL_SENT') else False)
-        self.ui.cb_eqsl_request.setChecked(True if edit_QSO_dict.get('CST_EQSL_QSL_REQUEST') else False)
-        self.ui.cb_lotw_rcvd.setChecked(True if edit_QSO_dict.get('CST_LOTW_QSL_RCVD') else False)
-        self.ui.cb_lotw_sent.setChecked(True if edit_QSO_dict.get('CST_LOTW_QSL_SENT') else False)
-        self.ui.cb_lotw_request.setChecked(True if edit_QSO_dict.get('CST_LOTW_QSL_REQUEST') else False)
+        # get key from value in dict{tuple()} struktur
+        qsl_rcvd = [key for key, value in QSL_RCVD_ENUMERATION.items() if edit_QSO_dict.get('QSL_RCVD') in value][0]
+        self.ui.cbo_rcvd_options.setCurrentText(qsl_rcvd)
+        qsl_send = [key for key, value in QSL_SENT_ENUMERATION.items() if edit_QSO_dict.get('QSL_SENT') in value][0]
+        self.ui.cbo_sent_options.setCurrentText(qsl_send)
+
+        self.ui.cb_eqsl_rcvd_new.setChecked(True if edit_QSO_dict.get('EQSL_QSL_RCVD') else False)
+        self.ui.cb_eqsl_sent_new.setChecked(True if edit_QSO_dict.get('EQSL_QSL_SENT') else False)
+
+        self.ui.cb_lotw_rcvd_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_RCVD') else False)
+        self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
     def closeEvent(self, event):
         if self.do_we_have_unsaved_changes:

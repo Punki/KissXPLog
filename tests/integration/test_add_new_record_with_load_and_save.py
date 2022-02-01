@@ -42,11 +42,11 @@ class TestJsonFileHandling(unittest.TestCase):
         # Same as above but with Frequency..
         self.adi_expect = [
             {"CALL": "AAA", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
-             "ITUZ": "28", "FREQ": "7"},
+             "ITUZ": "28", "FREQ": "7.0"},
             {"CALL": "BBB", "QSO_DATE": "000000", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
-             "ITUZ": "28", "FREQ": "7"},
+             "ITUZ": "28", "FREQ": "7.0"},
             {"CALL": "CCC", "QSO_DATE": "20190814", "MODE": "FT8", "BAND": "40m", "TIME_ON": "182500", "CQZ": "15",
-             "ITUZ": "28", "FREQ": "7"},
+             "ITUZ": "28", "FREQ": "7.0"},
             {"CALL": "DDD", "QSO_DATE": "20220104", "TIME_ON": "113653", "MODE": "FT8", "RST_SENT": "15",
              "RST_RCVD": "10", "FREQ": "182500"}]
 
