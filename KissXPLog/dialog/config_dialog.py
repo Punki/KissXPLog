@@ -49,6 +49,8 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         logging.debug(f"Save Configuration ...")
         # Save to File:
         user_settings['Autosave'] = self.ui2.cb_autosave.isChecked()
+        #user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()*60
+        # FixMe DEV ONLY
         user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()
         user_settings['MY_BANDS'] = self.checked_bands
 
@@ -69,7 +71,9 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
                 return
             else:
                 self.other_class_handle.autosave = self.ui2.cb_autosave.isChecked()
-                self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value() * 60
+                #self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value() * 60
+                #FixMe DEV ONLY
+                self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value()
                 self.other_class_handle.start_timed_autosave_thread()
         self.close()
 

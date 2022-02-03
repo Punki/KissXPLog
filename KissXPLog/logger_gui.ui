@@ -662,7 +662,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>90</width>
           <height>22</height>
          </size>
         </property>
@@ -1004,7 +1004,7 @@
             <widget class="QComboBox" name="cbo_rcvd_options">
              <property name="minimumSize">
               <size>
-               <width>80</width>
+               <width>90</width>
                <height>22</height>
               </size>
              </property>
@@ -1034,7 +1034,7 @@
             <widget class="QComboBox" name="cbo_sent_options">
              <property name="minimumSize">
               <size>
-               <width>80</width>
+               <width>90</width>
                <height>22</height>
               </size>
              </property>

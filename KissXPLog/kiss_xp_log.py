@@ -104,6 +104,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentQAction.toggled.connect(partial(self.setColumnVisible, column))
             currentQMenu.addAction(currentQAction)
         self.ui.bt_column_filter.setMenu(currentQMenu)
+        # Start Autosave if Conditions are given:
+        self.start_timed_autosave_thread()
 
     def _createActions(self):
         # File Menu Actions
@@ -204,9 +206,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cdw.show()
 
     def start_timed_autosave_thread(self):
-        if self.autosave_interval:
+        print(f"Threads activ: {threading.enumerate()}")
+        if self.timed_autosave_thread and self.autosave_interval:
             logging.debug(f"Start Autosave Thread..")
             self.timed_autosave_thread = threading.Timer(self.autosave_interval, self.start_timed_autosave_thread)
+            self.timed_autosave_thread.daemon = True
             self.timed_autosave_thread.start()
             self.autosave_to_file()
         else:
@@ -232,6 +236,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def auto_timer_dev(self, wait_in_sec):
         threading.Timer(wait_in_sec, lambda: self.auto_timer_dev(wait_in_sec)).start()
         self.print_something_useful()
+
+    def print_something_useful(self):
+        print("Something useful..")
 
     def fill_in_sub_modes(self):
         self.ui.cb_submodes.clear()
@@ -514,5 +521,5 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 else:
                     event.ignore()
 
-        self.stop_timed_autosave_thread()
+        # self.stop_timed_autosave_thread()
         print("Im Done with this...")
