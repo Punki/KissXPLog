@@ -106,35 +106,6 @@ Mehrere dieser Dictionary's werden in einer Liste zusammengefasst:
 ]
   ```
 
-### Custom Fields
-
-- `CST_QSL_RCVD` --> Card Received
-- `CST_QSL_SENT` --> Card Sent  
-- `CST_QSL_REQUEST` --> Card Requested  
-- `CST_EQSL_QSL_RCVD` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Received  
-- `CST_EQSL_QSL_SENT` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Sent  
-- `CST_EQSL_QSL_REQUEST` --> [EQSL](https://eqsl.cc/qslcard/Index.cfm) Requested  
-- `CST_LOTW_QSL_RCVD` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Received  
-- `CST_LOTW_QSL_SENT` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Sent  
-- `CST_LOTW_QSL_REQUEST` --> [LOTW](https://lotw.arrl.org/lotwuser/default) Requested  
-
-Diese werden für die Interne QSO Verwaltung benötigt und nicht exportiert. CST Custom Fields werden vom UI genommen und
-anschliessend ADIF konform verpackt in den entsprechenden Feldern.\
-Die Felder können die folgenden Stati haben:
-
-- Yes
-- No
-- Requested
-- Queued (Karte gemacht - Noch nicht versendet)
-
-
-#### Mapping-Beispiele
-Spezial Mapping Adif to Custom: 
-- Case 1: Sent + Request = SENT[Y],RCVD[R]
-- Case 2: Rcvd + Request = RCVD[Y],SENT[Q]
-- Case 3: Sent = SENT[Y]
-- Case 4: Rcvd = RCVD[Y]
-- Case 5: Request = SENT[Q]
 
 # Bedienung:
 
@@ -148,6 +119,15 @@ Speichert die geänderten Einträge in die Tabelle.
 
 **[Clear]** \
 Die Eingabemaske wird zurückgesetzt.
+
+## Konfiguration -> File->Show Konfig Dialog
+### Autosave
+* Ermöglicht das automatische Speichern in regelmässigen Abständen (Minuten).
+* Beim Eintrag (0 Minuten) wird automatisch jede Änderung gespeichert.
+
+### Custom Filter
+* Ermöglichen es eine Auswahl zu Treffen, welche Werte im Gui zur Verfügung stehen.
+
 
 ## Einlesen
 

@@ -22,8 +22,6 @@ from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_
 from KissXPLog.table_model import TableModel
 
 
-# pyuic5 -x logger_gui.ui -o logger_gui.py
-
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -104,6 +102,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentQAction.toggled.connect(partial(self.setColumnVisible, column))
             currentQMenu.addAction(currentQAction)
         self.ui.bt_column_filter.setMenu(currentQMenu)
+
         # Start Autosave if Conditions are given:
         self.start_timed_autosave_thread()
 
@@ -120,8 +119,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.discardAction = QAction("&Discard", self)
         self.editTableAction = QAction("&Edit Table", self)
 
-        self.devTimePrintAction = QAction("&Print with Timer", self)
-        self.devAutosaveAction = QAction("&Enable Autosave", self)
+        # DEV options:
+        # self.devTimePrintAction = QAction("&Print with Timer", self)
+        # self.devAutosaveAction = QAction("&Enable Autosave", self)
 
         # Help Menu Actions
         # self.helpContentAction = QAction("&Help Content", self)
@@ -143,9 +143,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editMenu.addAction(self.discardAction)
         editMenu.addAction(self.editTableAction)
 
-        devMenu = menuBar.addMenu("&DEV")
-        devMenu.addAction(self.devTimePrintAction)
-        devMenu.addAction(self.devAutosaveAction)
+        # DEV options
+        #devMenu = menuBar.addMenu("&DEV")
+        #devMenu.addAction(self.devTimePrintAction)
+        #devMenu.addAction(self.devAutosaveAction)
+        #self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
+        #self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
+
         # helpMenu = menuBar.addMenu("&Help")
         # helpMenu.addAction(self.helpContentAction)
         # helpMenu.addAction(self.aboutAction)
@@ -164,8 +168,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
 
         # Connect File actions
-        self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
-        self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
         self.configAction.triggered.connect(self.show_config_window)
         self.saveAction.triggered.connect(self.json_save_file_chooser)
         self.loadAction.triggered.connect(self.json_load_file_chooser)
