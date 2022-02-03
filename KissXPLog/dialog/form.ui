@@ -26,6 +26,13 @@
    <string>Widget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pb_chancel">
+     <property name="text">
+      <string>Chancel</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="gb_auto_save">
      <property name="maximumSize">
@@ -74,6 +81,13 @@
      </layout>
     </widget>
    </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="pb_save">
+     <property name="text">
+      <string>Save</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="minimumSize">
@@ -86,30 +100,6 @@
       <string>Custom Filter</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="1">
-       <widget class="QPushButton" name="pb_bands_filter">
-        <property name="minimumSize">
-         <size>
-          <width>75</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Filter Bands</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="lb_bands">
         <property name="minimumSize">
@@ -131,37 +121,6 @@
         </property>
         <property name="text">
          <string>Bands:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="pb_modes_filter">
-        <property name="minimumSize">
-         <size>
-          <width>75</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Filter Modes</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lb_fields">
-        <property name="text">
-         <string>Fields:</string>
         </property>
        </widget>
       </item>
@@ -189,10 +148,51 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="pb_fields_filter">
+      <item row="1" column="1">
+       <widget class="QPushButton" name="pb_modes_filter">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="text">
-         <string>Field Filter</string>
+         <string>Filter Modes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="pb_bands_filter">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Filter Bands</string>
         </property>
        </widget>
       </item>
@@ -200,54 +200,42 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QGroupBox" name="gb_my_data">
+     <property name="title">
+      <string>My Data:</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="pb_save">
-     <property name="text">
-      <string>Save</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QPushButton" name="pb_DEV">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>80</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Don't Push !</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
-    <widget class="QPushButton" name="pb_chancel">
-     <property name="text">
-      <string>Chancel</string>
-     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lb_my_call">
+        <property name="text">
+         <string>My Call:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="le_my_call"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lb_my_cqzone">
+        <property name="text">
+         <string>CQ-Zone</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="le_my_cqzone"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lb_my_ituzone">
+        <property name="text">
+         <string> ITU-Zone</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="le_my_ituzone"/>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

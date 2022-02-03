@@ -11,8 +11,11 @@ user_settings['Autosave'] = None
 user_settings['AutosaveIntervall'] = None
 user_settings['MY_BANDS'] = None
 user_settings['MY_Modes'] = None
-user_settings['My_CALL'] = None
-user_settings['My_QTH'] = None
+user_settings['STATION_CALLSIGN'] = None
+user_settings['MY_CQ_ZONE'] = None
+user_settings['MY_ITU_ZONE'] = None
+
+
 
 
 def save_user_settings_to_file():
