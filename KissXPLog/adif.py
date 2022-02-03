@@ -1,7 +1,7 @@
 import logging
 import re
 
-# todo Exception handling
+
 # verify Adif Data
 from KissXPLog.const_adif_fields import BAND_WITH_FREQUENCY
 
@@ -34,26 +34,26 @@ def export_to_adif(filename, qsos_to_write, exclude_list):
     try:
         with open(filename, "w") as open_file:
             # Write Header to File:
-            # logging.debug("Bummel")
             open_file.write(f"<ADIF_VER:{len(adif_ver)}>{adif_ver}" + "\n")
             open_file.write(f"<ProgramID:{len(program_id)}>{program_id}" + "\n")
             open_file.write(f"<ProgramVersion:{len(program_version)}>{program_version}" + "\n")
             open_file.write(f"<{app_created}:{len(app_created_date)}>{app_created_date}" + "\n")
             open_file.write("<EOH>" + "\n")
-    except Exception as e:
+    except (FileNotFoundError, PermissionError) as e:
         logging.error(f"Error while writing header to file {filename}: {e}")
     # Write Data to File:
-    with open(filename, "a") as open_file:
-        for qso in qsos_to_write:
-            for element in qso:
-                if element in exclude_list:
-                    continue
-                try:
+    try:
+        with open(filename, "a") as open_file:
+            for qso in qsos_to_write:
+                for element in qso:
+                    if element in exclude_list:
+                        continue
+
                     open_file.write(f"<{element}:{len(qso.get(element))}>{qso.get(element)}")
                     logging.debug(f"Logging Element {element} of qso {qso}")
-                except Exception as e:
-                    logging.error(f"Error while writing qso {qso} to file {filename}: {e}")
-            open_file.write("<EOR> \n")
+                open_file.write("<EOR> \n")
+    except (FileNotFoundError, PermissionError) as e:
+        logging.error(f"Error while writing qso {qso} to file {filename}: {e}")
 
 
 def remove_header_from_file(adif_text_file):
@@ -110,7 +110,7 @@ def split_single_QSO(single_raw_qso):
         # Write the QSO in a Dictionary (Key:Value)
         single_qso_dict[field_name] = field_value
 
-    #qso_status_from_adif_to_custom_mapping(single_qso_dict)
+    # qso_status_from_adif_to_custom_mapping(single_qso_dict)
     fix_time_without_seconds(single_qso_dict)
     fix_band_and_freq_when_one_of_them_is_available(single_qso_dict)
     return single_qso_dict
@@ -152,4 +152,3 @@ def fix_band_and_freq_when_one_of_them_is_available(single_qso_dict):
                 single_qso_dict['BAND'] = str(band)
 
     return single_qso_dict
-

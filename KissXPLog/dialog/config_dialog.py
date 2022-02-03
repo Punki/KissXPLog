@@ -10,9 +10,6 @@ from KissXPLog.dialog.form import Ui_Widget
 from KissXPLog.messages import show_error_message
 
 
-# pyuic5 -x .\form.ui -o .\form.py
-
-
 class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
     def __init__(self, parent=None):
         super().__init__()
@@ -49,16 +46,20 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         logging.debug(f"Save Configuration ...")
         # Save to File:
         user_settings['Autosave'] = self.ui2.cb_autosave.isChecked()
-        #user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()*60
-        # FixMe DEV ONLY
-        user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()
+        user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()*60
+        # DEV ONLY
+        #user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()
         user_settings['MY_BANDS'] = self.checked_bands
+        user_settings['STATION_CALLSIGN'] = self.ui2.le_my_call.text()
+        user_settings['MY_CQ_ZONE'] = self.ui2.le_my_cqzone.text()
+        user_settings['MY_ITU_ZONE'] = self.ui2.le_my_ituzone.text()
 
         my_modes_with_sub = {}
         for mode in self.checked_modes:
             my_modes_with_sub[mode] = MODES_WITH_SUBMODE.get(mode)
         user_settings['MY_Modes'] = self.checked_modes
         save_user_settings_to_file()
+
         # Set Settings Live:
         self.other_class_handle.ui.cb_mode.clear()
         self.other_class_handle.ui.cb_mode.addItems(my_modes_with_sub)
@@ -71,9 +72,9 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
                 return
             else:
                 self.other_class_handle.autosave = self.ui2.cb_autosave.isChecked()
-                #self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value() * 60
-                #FixMe DEV ONLY
-                self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value()
+                self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value() * 60
+                # DEV ONLY
+                #self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value()
                 self.other_class_handle.start_timed_autosave_thread()
         self.close()
 
