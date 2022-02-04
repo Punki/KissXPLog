@@ -39,7 +39,6 @@ class FilterDialog(QDialog):
     def de_select_all(self, event):
         model = self.listView.model()
         for index in range(model.rowCount()):
-            if event:
-                model.item(index).setCheckState(True)
-            else:
-                model.item(index).setCheckState(False)
+            model.item(index).setCheckState(event)
+
+
