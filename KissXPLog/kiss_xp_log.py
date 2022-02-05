@@ -4,12 +4,13 @@ import logging
 import re
 import threading
 from functools import partial
+from time import sleep
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog import load_user_settings_from_file
+from KissXPLog import UserConfig
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
     frequency_to_band
 from KissXPLog.const_adif_fields import QSL_RCVD_ENUMERATION, QSL_SENT_ENUMERATION, MODES_WITH_SUBMODE, \
@@ -18,7 +19,8 @@ from KissXPLog.dialog.config_dialog import ConfigDialog
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
-from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list
+from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
+    prune_qsos
 from KissXPLog.table_model import TableModel
 
 
@@ -32,6 +34,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._createActions()
         self._createMenuBar()
         self._connectActions()
+        self._createFullDevMenu()
 
         self.show()
 
@@ -59,6 +62,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cantons = CANTONS
 
         # Load Config File
+        self.user_config = UserConfig()
         self.load_user_settings()
 
         self.model = TableModel(self.data, self.row_index)
@@ -119,10 +123,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.discardAction = QAction("&Discard", self)
         self.editTableAction = QAction("&Edit Table", self)
 
-        # DEV options:
-        # self.devTimePrintAction = QAction("&Print with Timer", self)
-        # self.devAutosaveAction = QAction("&Enable Autosave", self)
-
         # Help Menu Actions
         # self.helpContentAction = QAction("&Help Content", self)
         # self.aboutAction = QAction("&About", self)
@@ -142,13 +142,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editMenu.addAction(self.newAction)
         editMenu.addAction(self.discardAction)
         editMenu.addAction(self.editTableAction)
-
-        # DEV options
-        #devMenu = menuBar.addMenu("&DEV")
-        #devMenu.addAction(self.devTimePrintAction)
-        #devMenu.addAction(self.devAutosaveAction)
-        #self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
-        #self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
         # helpMenu = menuBar.addMenu("&Help")
         # helpMenu.addAction(self.helpContentAction)
@@ -182,6 +175,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
 
+    def _createFullDevMenu(self):
+        self.new_dev_menu_method = QAction("Simple Thread", self)
+        # self.devTimePrintAction = QAction("&Print with Timer", self)
+        # self.devAutosaveAction = QAction("&Enable Autosave", self)
+        devMenu = self.menuBar().addMenu("&DEV")
+        devMenu.addAction(self.new_dev_menu_method)
+        # devMenu.addAction(self.devTimePrintAction)
+        # devMenu.addAction(self.devAutosaveAction)
+        self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
+        # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
+        # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
+
+    def new_thread_methoden_test(self):
+        t = threading.Thread(target=self.print_something_useful, daemon=True)
+        print(f"Threads activ: {threading.enumerate()}")
+        t.start()
+
+    def print_something_useful(self):
+        print("Something useful..")
+        print(f"Threads activ: {threading.enumerate()}")
+        sleep(10)
+        self.ui.le_call.setText("Gogogo...")
+        sleep(10)
+        print("after Sleep..")
+
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
         self._do_we_have_unsaved_changes = do_we_have_unsaved_changes
@@ -190,18 +208,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.autosave_to_file()
 
     def load_user_settings(self):
-        if user_settings := load_user_settings_from_file():
-            logging.info(f"Loaded User Config.")
-            self.autosave = user_settings.get('Autosave')
-            self.autosave_interval = int(user_settings.get('AutosaveIntervall'))
-            if user_settings.get('MY_BANDS'):
-                self.bands = user_settings.get('MY_BANDS')
-            else:
-                self.bands = MODES_WITH_SUBMODE
-            if user_settings.get('MY_Modes'):
-                self.modes = user_settings.get('MY_Modes')
-            else:
-                self.modes = BAND_WITH_FREQUENCY
+        logging.info(f"Loaded User Config.")
+        self.autosave = self.user_config.user_settings.get('Autosave')
+        if asave := self.user_config.user_settings.get('AutosaveIntervall'):
+            self.autosave_interval = int(asave)
+        if self.user_config.user_settings.get('MY_BANDS'):
+            self.bands = self.user_config.user_settings.get('MY_BANDS')
+        else:
+            self.bands = MODES_WITH_SUBMODE
+        if self.user_config.user_settings.get('MY_Modes'):
+            self.modes = self.user_config.user_settings.get('MY_Modes')
+        else:
+            self.modes = BAND_WITH_FREQUENCY
 
     def show_config_window(self):
         self.cdw = ConfigDialog(self)
@@ -230,6 +248,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 logging.info(f"Saving Table...")
                 self.last_autosaved_hash = data_md5
                 generic_save_data_to_file("autosaved.json", self.model.get_data_from_table())
+                self.set_do_we_have_unsaved_changes(False)
             else:
                 logging.info(f"Nothing new to save..")
         else:
@@ -238,9 +257,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def auto_timer_dev(self, wait_in_sec):
         threading.Timer(wait_in_sec, lambda: self.auto_timer_dev(wait_in_sec)).start()
         self.print_something_useful()
-
-    def print_something_useful(self):
-        print("Something useful..")
 
     def fill_in_sub_modes(self):
         self.ui.cb_submodes.clear()
@@ -346,7 +362,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    'COUNTRY': self.ui.le_country.text(),
                    'STATE': self.ui.cb_canton.currentText()
                    }
-
         return new_qso
 
     def save_new_log_entry(self):
@@ -374,6 +389,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.te_notes.clear()
         self.ui.le_country.clear()
         self.ui.cb_canton.setCurrentIndex(0)
+
         self.ui.cbo_rcvd_options.setCurrentIndex(0)
         self.ui.cbo_sent_options.setCurrentIndex(0)
 
@@ -412,7 +428,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             show_error_message("Error", f"Data Type is not supported: {file_extension}")
             return
         new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
-        self.model.add_new_qsos_list(new_full_qso_list)
+        new_clean_full_qso_list = prune_qsos(new_full_qso_list)
+        self.model.add_new_qsos_list(new_clean_full_qso_list)
 
     def json_save_file_chooser(self):
         logging.debug("Open File Select for Save in JSON")
@@ -423,7 +440,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File will be saved to {filename}")
             generic_save_data_to_file(filename, self.model.get_data_from_table())
-            self.set_do_we_have_unsaved_changes(False)
             return True
 
     def json_load_file_chooser(self):
@@ -460,6 +476,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.generic_load_file_to_table(filename)
 
     def get_table_row_data(self, index):
+        self.clear_new_log_entry_form()
         # Get the Real Row bcs > Filtering and Sorting..
         new_row = self.proxyModel.mapToSource(index).row()
         edit_QSO_dict = self.model.get_data_row_from_table(new_row)
@@ -473,6 +490,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.update_qso:
             self.update_qso = False
             updated_qso = self.get_dict_from_inputform()
+            updated_qso = remove_empty_fields(updated_qso)
             row = self.row
             self.model.update_single_qso(row, updated_qso)
             self.clear_new_log_entry_form()
@@ -496,16 +514,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
         # Todo Check if County is Swiss
         self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
-
+        # FixMe Check for None Value! >> None should be '' in Gui!
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
         for key, value in QSL_RCVD_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_RCVD'):
                 self.ui.cbo_rcvd_options.setCurrentText(key)
+                break
 
         for key, value in QSL_RCVD_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_SENT'):
                 self.ui.cbo_sent_options.setCurrentText(key)
+                break
 
         self.ui.cb_eqsl_rcvd_new.setChecked(True if edit_QSO_dict.get('EQSL_QSL_RCVD') else False)
         self.ui.cb_eqsl_sent_new.setChecked(True if edit_QSO_dict.get('EQSL_QSL_SENT') else False)

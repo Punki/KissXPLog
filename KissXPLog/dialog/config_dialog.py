@@ -3,7 +3,6 @@ import logging
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog
 
-from KissXPLog import user_settings, save_user_settings_to_file
 from KissXPLog.const_adif_fields import MODES_WITH_SUBMODE, BAND_WITH_FREQUENCY
 from KissXPLog.dialog.filter_dialog import FilterDialog
 from KissXPLog.dialog.form import Ui_Widget
@@ -18,6 +17,8 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.other_class_handle = parent
         self.ui2.cb_autosave_interval.setMaximum(59)
         self.ui2.cb_autosave_interval.setMinimum(0)
+
+        self.load_config()
 
         # Alle möglichen Werte
         self.modes = MODES_WITH_SUBMODE
@@ -42,23 +43,38 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.pb_bands_filter.clicked.connect(self.show_bands_filter_dialog)
         self.ui2.pb_modes_filter.clicked.connect(self.show_modes_filter_dialog)
 
+    def load_config(self):
+        #Callsign Uppercase
+        self.ui2.le_my_call.textChanged.connect(lambda: self.ui2.le_my_call.setText(self.ui2.le_my_call.text().upper()))
+
+        my_call = self.other_class_handle.user_config.user_settings['STATION_CALLSIGN']
+        my_cq_zone = self.other_class_handle.user_config.user_settings['MY_CQ_ZONE']
+        my_itu_zone = self.other_class_handle.user_config.user_settings['MY_ITU_ZONE']
+        self.ui2.le_my_call.setText(my_call)
+        self.ui2.le_my_cqzone.setText(my_cq_zone)
+        self.ui2.le_my_ituzone.setText(my_itu_zone)
+
+
+
     def save_config(self):
         logging.debug(f"Save Configuration ...")
         # Save to File:
-        user_settings['Autosave'] = self.ui2.cb_autosave.isChecked()
-        user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()*60
+
+        self.other_class_handle.user_config.user_settings['Autosave'] = self.ui2.cb_autosave.isChecked()
+        self.other_class_handle.user_config.user_settings[
+            'AutosaveIntervall'] = self.ui2.cb_autosave_interval.value() * 60
         # DEV ONLY
-        #user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()
-        user_settings['MY_BANDS'] = self.checked_bands
-        user_settings['STATION_CALLSIGN'] = self.ui2.le_my_call.text()
-        user_settings['MY_CQ_ZONE'] = self.ui2.le_my_cqzone.text()
-        user_settings['MY_ITU_ZONE'] = self.ui2.le_my_ituzone.text()
+        # user_settings['AutosaveIntervall'] = self.ui2.cb_autosave_interval.value()
+        self.other_class_handle.user_config.user_settings['MY_BANDS'] = self.checked_bands
+        self.other_class_handle.user_config.user_settings['STATION_CALLSIGN'] = self.ui2.le_my_call.text()
+        self.other_class_handle.user_config.user_settings['MY_CQ_ZONE'] = self.ui2.le_my_cqzone.text()
+        self.other_class_handle.user_config.user_settings['MY_ITU_ZONE'] = self.ui2.le_my_ituzone.text()
 
         my_modes_with_sub = {}
         for mode in self.checked_modes:
             my_modes_with_sub[mode] = MODES_WITH_SUBMODE.get(mode)
-        user_settings['MY_Modes'] = self.checked_modes
-        save_user_settings_to_file()
+        self.other_class_handle.user_config.user_settings['MY_Modes'] = self.checked_modes
+        self.other_class_handle.user_config.save_user_settings_to_file()
 
         # Set Settings Live:
         self.other_class_handle.ui.cb_mode.clear()
@@ -74,7 +90,7 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
                 self.other_class_handle.autosave = self.ui2.cb_autosave.isChecked()
                 self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value() * 60
                 # DEV ONLY
-                #self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value()
+                # self.other_class_handle.autosave_interval = self.ui2.cb_autosave_interval.value()
                 self.other_class_handle.start_timed_autosave_thread()
         self.close()
 

@@ -1,6 +1,17 @@
 def remove_empty_fields(qso_to_check):
     """Removes None, "", False values from dict."""
-    return dict((k, v) for k, v in qso_to_check.items() if v)
+    cleaned_qso = {k: v for k, v in qso_to_check.items() if v}
+    return cleaned_qso
+
+
+def prune_qsos(qsos_to_check):
+    """
+    Remove Empty Fields from Qsos.
+    :param qsos_to_check:
+    :type qsos_to_check:List[dict]
+    :return:List[dict]
+    """
+    return list(map(remove_empty_fields, qsos_to_check))
 
 
 def add_new_information_to_qso_list(old_qsos, new_qsos):

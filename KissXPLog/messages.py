@@ -18,9 +18,10 @@ def logging_setup(logfile):
     """
     logging.basicConfig(
         filename=logfile,  # All logs are written into this logfile
-        format='%(asctime)s: %(levelname)s - %(message)s',  # The formate is [datatimee]: [level] - [message]
+        format='%(asctime)s: %(threadName)s - %(name)s - %(levelname)s - %(message)s',
+        # The formate is [datatimee]: [threadname] - [name] - [level] - [message]
         level=logging.DEBUG,  # Everything will be logged. Possible levels: DEBUG, INFO, WARN, ERROR, CRITICAL
-        datefmt='%m/%d/%Y %H:%M:%S'  # datetime format: 03/26/2019 13:59:09
+        datefmt='%Y/%m/%d %H:%M:%S'  # datetime format: 2019/03/26 13:59:09
     )
 
 
