@@ -20,7 +20,6 @@ from KissXPLog.file_operations import read_data_from_json_file, initial_file_dia
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
 from KissXPLog.qrz_lookup import get_dxcc_from_callsign
-from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
     prune_qsos
 from KissXPLog.table_model import TableModel
@@ -151,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
-        self.ui.le_call.editingFinished.connect(self.new_dxcc_lookup_thrad)
+        self.ui.le_call.editingFinished.connect(self.new_dxcc_lookup_thread)
         # UE: Fill Freq from Band und Vice Versa
         self.ui.le_freq.textEdited.connect(self.set_band_from_frequency)
         self.ui.cb_band.currentIndexChanged.connect(self.set_frequency_from_band)
@@ -222,11 +221,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.user_config.user_settings.get('MY_BANDS'):
             self.bands = self.user_config.user_settings.get('MY_BANDS')
         else:
-            self.bands = MODES_WITH_SUBMODE
+            self.modes = MODES_WITH_SUBMODE
         if self.user_config.user_settings.get('MY_Modes'):
             self.modes = self.user_config.user_settings.get('MY_Modes')
         else:
-            self.modes = BAND_WITH_FREQUENCY
+            self.bands = BAND_WITH_FREQUENCY
 
     def show_config_window(self):
         self.cdw = ConfigDialog(self)
@@ -285,13 +284,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.ui.le_rst_sent.setText("59")
                     self.ui.le_rst_rcvd.setText("59")
 
-    def new_dxcc_lookup_thrad(self):
+    def new_dxcc_lookup_thread(self):
         callsign = self.ui.le_call.text()
         t = threading.Thread(target=self.dxcc_lookup, args=(callsign,), daemon=True)
         t.start()
 
     def dxcc_lookup(self, callsign):
-        self.all_dxcc = get_dxcc_from_callsign(callsign)
+        try:
+            self.all_dxcc = get_dxcc_from_callsign(callsign)
+        except TypeError:
+            show_error_message("No QRZ-info found", f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
+            return
         self.set_time_and_country_after_call()
 
     def set_time_and_country_after_call(self):
