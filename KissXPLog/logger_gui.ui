@@ -42,7 +42,7 @@
        <widget class="QLineEdit" name="le_name">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
@@ -157,7 +157,7 @@
        <widget class="QComboBox" name="cb_mode">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>125</width>
           <height>22</height>
          </size>
         </property>
@@ -307,7 +307,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>150</width>
             <height>22</height>
            </size>
           </property>
@@ -321,6 +321,12 @@
         </item>
         <item row="1" column="1">
          <widget class="QTextEdit" name="te_notes">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>100</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>500</width>
@@ -401,7 +407,7 @@
        <widget class="QLineEdit" name="le_rst_rcvd">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>80</width>
           <height>22</height>
          </size>
         </property>
@@ -465,7 +471,7 @@
        <widget class="QComboBox" name="cb_band">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>70</width>
           <height>22</height>
          </size>
         </property>
@@ -486,7 +492,7 @@
        <widget class="QLineEdit" name="le_country">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
@@ -571,7 +577,7 @@
        <widget class="QComboBox" name="cb_submodes">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>125</width>
           <height>22</height>
          </size>
         </property>
@@ -592,7 +598,7 @@
        <widget class="QLineEdit" name="le_call">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
@@ -688,7 +694,7 @@
        <widget class="QLineEdit" name="le_rst_sent">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>80</width>
           <height>22</height>
          </size>
         </property>
@@ -752,7 +758,7 @@
        <widget class="QComboBox" name="cb_canton">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
@@ -858,7 +864,7 @@
        <widget class="QLineEdit" name="le_freq">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>70</width>
           <height>22</height>
          </size>
         </property>
@@ -1008,7 +1014,7 @@
             <widget class="QComboBox" name="cbo_rcvd_options">
              <property name="minimumSize">
               <size>
-               <width>90</width>
+               <width>80</width>
                <height>22</height>
               </size>
              </property>
@@ -1038,7 +1044,7 @@
             <widget class="QComboBox" name="cbo_sent_options">
              <property name="minimumSize">
               <size>
-               <width>90</width>
+               <width>80</width>
                <height>22</height>
               </size>
              </property>
@@ -1084,7 +1090,7 @@
        <widget class="QLineEdit" name="le_continent">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
@@ -1129,7 +1135,7 @@
        <widget class="QLineEdit" name="le_cq">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
@@ -1150,7 +1156,7 @@
        <widget class="QLineEdit" name="le_itu">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>150</width>
           <height>22</height>
          </size>
         </property>
