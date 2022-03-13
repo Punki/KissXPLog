@@ -287,6 +287,11 @@
             <height>22</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>Comment:</string>
           </property>
@@ -874,6 +879,11 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="0">
          <widget class="QGroupBox" name="gp_eqsl">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="title">
            <string>Eqsl</string>
           </property>
@@ -921,6 +931,11 @@
         </item>
         <item row="1" column="1">
          <widget class="QGroupBox" name="gb_lotw">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="title">
            <string>Lotw</string>
           </property>
@@ -979,6 +994,11 @@
             <width>16777215</width>
             <height>80</height>
            </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
           </property>
           <property name="title">
            <string>Card</string>
