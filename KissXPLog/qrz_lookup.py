@@ -35,8 +35,6 @@ def get_dxcc_from_callsign(callsign: str):
     all_regex.sort(key=len, reverse=True)
 
     for element in all_regex:
-        pattern = f'^{element}'
-        logging.debug(f"Checking Regex {pattern}....\n")
         if callsign.startswith(element):
             logging.debug("Found Match")
             return dxcc.get(element)
