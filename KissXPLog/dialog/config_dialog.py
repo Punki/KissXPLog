@@ -17,25 +17,14 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.other_class_handle = parent
         self.ui2.cb_autosave_interval.setMaximum(59)
         self.ui2.cb_autosave_interval.setMinimum(0)
+        self.checked_bands = None
+        self.checked_modes = None
 
         self.load_config()
 
         # Alle möglichen Werte
         self.modes = MODES_WITH_SUBMODE
         self.bands = BAND_WITH_FREQUENCY
-        # Checked Werte von Main
-        # Dict if none configfile was used, otherwise is a list.
-        if type(self.other_class_handle.bands) is dict:
-            self.checked_bands = list(self.other_class_handle.bands.keys())
-        else:
-            self.checked_bands = self.other_class_handle.bands
-        if type(self.other_class_handle.modes) is dict:
-            self.checked_modes = list(self.other_class_handle.modes.keys())
-        else:
-            self.checked_modes = self.other_class_handle.modes
-
-        self.ui2.cb_autosave.setChecked(self.other_class_handle.autosave)
-        self.ui2.cb_autosave_interval.setValue(self.other_class_handle.autosave_interval)
 
         # Connect Action to buttons
         self.ui2.pb_save.clicked.connect(self.save_config)
@@ -44,7 +33,7 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.pb_modes_filter.clicked.connect(self.show_modes_filter_dialog)
 
     def load_config(self):
-        #Callsign Uppercase
+        # Callsign Uppercase
         self.ui2.le_my_call.textChanged.connect(lambda: self.ui2.le_my_call.setText(self.ui2.le_my_call.text().upper()))
 
         my_call = self.other_class_handle.user_config.user_settings['STATION_CALLSIGN']
@@ -54,7 +43,20 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.le_my_cqzone.setText(my_cq_zone)
         self.ui2.le_my_ituzone.setText(my_itu_zone)
 
+        self.ui2.cb_autosave.setChecked(self.other_class_handle.autosave)
+        self.ui2.cb_autosave_interval.setValue(self.other_class_handle.autosave_interval)
 
+        # Checked Werte von Main
+        # Dict if none configfile was used, otherwise is a list.
+        if type(self.other_class_handle.bands) is dict:
+            self.checked_bands = list(self.other_class_handle.bands.keys())
+        else:
+            self.checked_bands = self.other_class_handle.bands
+
+        if type(self.other_class_handle.modes) is dict:
+            self.checked_modes = list(self.other_class_handle.modes.keys())
+        else:
+            self.checked_modes = self.other_class_handle.modes
 
     def save_config(self):
         logging.debug(f"Save Configuration ...")

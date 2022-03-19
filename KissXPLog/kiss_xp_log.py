@@ -62,7 +62,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.custom_fields_list = []
 
         self.modes = MODES_WITH_SUBMODE
-        self.cantons = CANTONS
+        self.ui.cb_canton.setDisabled(True)
 
         # Load Config File
         self.user_config = UserConfig()
@@ -89,7 +89,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Fill in Comboboxes
         self.ui.cb_band.addItems(self.bands)
         self.ui.cb_mode.addItems(self.modes)
-        self.ui.cb_canton.addItems(self.cantons)
         self.ui.cbo_sent_options.addItems(QSL_SENT_ENUMERATION)
         self.ui.cbo_rcvd_options.addItems(QSL_RCVD_ENUMERATION)
 
@@ -158,6 +157,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.currentIndexChanged.connect(self.set_default_rst)
         # Call should always be Uppercase
         self.ui.le_call.textChanged.connect(lambda: self.ui.le_call.setText(self.ui.le_call.text().upper()))
+        #Enable Cantons if Country is Swiss
+        self.ui.le_country.textChanged.connect(self.enable_canton_if_swiss)
+
         # Fill the Submodes from Mode select
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
 
@@ -187,6 +189,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
+
 
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)
@@ -232,8 +235,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cdw.show()
 
     def start_timed_autosave_thread(self):
-        print(f"Threads activ: {threading.enumerate()}")
         if self.timed_autosave_thread and self.autosave_interval:
+            print(f"Threads activ: {threading.enumerate()}")
             logging.debug(f"Start Autosave Thread..")
             self.timed_autosave_thread = threading.Timer(self.autosave_interval, self.start_timed_autosave_thread)
             self.timed_autosave_thread.daemon = True
@@ -264,6 +267,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         threading.Timer(wait_in_sec, lambda: self.auto_timer_dev(wait_in_sec)).start()
         self.print_something_useful()
 
+    def enable_canton_if_swiss(self):
+        if self.ui.le_country.text() == 'Switzerland':
+            self.ui.cb_canton.setDisabled(False)
+            self.ui.cb_canton.addItems(CANTONS)
+        else:
+            self.ui.cb_canton.setDisabled(True)
+
     def fill_in_sub_modes(self):
         self.ui.cb_submodes.clear()
         selected_mode = self.ui.cb_mode.currentText()
@@ -293,24 +303,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.all_dxcc = get_dxcc_from_callsign(callsign)
         except TypeError:
-            show_error_message("No QRZ-info found", f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
+            show_error_message("No QRZ-info found",
+                               f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
             return
-        self.set_time_and_country_after_call()
+        self.set_time_after_callsign_enter()
+        self.auto_enter_dxcc_infos_from_callsign()
 
-    def set_time_and_country_after_call(self):
-        # Improvement for better User experience
-        # Todo: Make Function to get Country from Prefix
-        # if not self.ui.le_country.text():
-        # self.ui.le_country.setText("Todo")
-        # Set Time to this:
+    def set_time_after_callsign_enter(self):
+        # if time not changed, set to now:
         if self.ui.timeEdit.time().toString("HHmmss") == '000000':
             if self.ui.dateEdit.date().toString("yyyyMMdd") == '20000101':
-                self.update_date_and_time_for_new_qso()
+                self.set_gui_date_and_time_to_now()
+
+    def auto_enter_dxcc_infos_from_callsign(self):
+        # Improvement for better User experience
         if len(self.all_dxcc) > 0:
-            self.ui.le_country.setText(self.all_dxcc['Country'])
-            self.ui.le_continent.setText(self.all_dxcc['Continent'])
-            self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
-            self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
+            if self.all_dxcc['Country']:
+                if not self.ui.le_country.text():
+                    self.ui.le_country.setText(self.all_dxcc['Country'])
+            if self.all_dxcc['Continent']:
+                if not self.ui.le_continent.text():
+                    self.ui.le_continent.setText(self.all_dxcc['Continent'])
+            if self.all_dxcc['ITUZone']:
+                if not self.ui.le_itu.text():
+                    self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
+            if self.all_dxcc['CQZone']:
+                if not self.ui.le_cq.text():
+                    self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
 
     def set_frequency_from_band(self):
         # check if freq is empty!
@@ -337,7 +356,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxyModel.setFilterKeyColumn(0)
         self.proxyModel.setFilterRegExp(QRegExp(text, Qt.CaseInsensitive, QRegExp.FixedString))
 
-    def update_date_and_time_for_new_qso(self):
+    def set_gui_date_and_time_to_now(self):
         self.ui.timeEdit.setTime(QDateTime.currentDateTimeUtc().time())
         self.ui.dateEdit.setDate(QDateTime.currentDateTime().date())
 
@@ -413,6 +432,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.te_notes.clear()
         self.ui.le_country.clear()
         self.ui.cb_canton.setCurrentIndex(0)
+        self.ui.le_continent.clear()
+        self.ui.le_cq.clear()
+        self.ui.le_itu.clear()
 
         self.ui.cbo_rcvd_options.setCurrentIndex(0)
         self.ui.cbo_sent_options.setCurrentIndex(0)
@@ -536,17 +558,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
         self.ui.le_comment.setText(edit_QSO_dict.get('COMMENT'))
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
-        # Todo Check if County is Swiss
-        self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
-        # FixMe Check for None Value! >> None should be '' in Gui!
+        if self.ui.le_country.text() == 'Switzerland':
+            self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
+
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
+        #
         for key, value in QSL_RCVD_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_RCVD'):
                 self.ui.cbo_rcvd_options.setCurrentText(key)
                 break
 
-        for key, value in QSL_RCVD_ENUMERATION.items():
+        for key, value in QSL_SENT_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_SENT'):
                 self.ui.cbo_sent_options.setCurrentText(key)
                 break
