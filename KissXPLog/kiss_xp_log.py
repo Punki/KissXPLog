@@ -555,7 +555,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.ui.cbo_rcvd_options.setCurrentText(key)
                 break
 
-        for key, value in QSL_RCVD_ENUMERATION.items():
+        for key, value in QSL_SENT_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_SENT'):
                 self.ui.cbo_sent_options.setCurrentText(key)
                 break
