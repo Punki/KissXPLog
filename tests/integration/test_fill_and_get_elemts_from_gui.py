@@ -15,8 +15,8 @@ class TestJsonFileHandling(TestCase):
         input_data = {'CALL': 'TESTTESTTEST', 'QSO_DATE': '20201119', 'TIME_ON': '155300',
                       'MODE': 'JT65', 'SUBMODE': 'JT65A', 'RST_SENT': '-18', 'RST_RCVD': '-23',
                       'BAND': '40m', 'FREQ': '7', 'NAME': 'JohnDoe', 'NOTES': 'notes?', 'COMMENT': 'nope',
-                      'QSL_RCVD': 'R', 'QSL_SENT': 'Y', 'EQSL_QSL_RCVD': False, 'EQSL_QSL_SENT': True,
-                      'LOTW_QSL_RCVD': True, 'LOTW_QSL_SENT': False,
+                      'QSL_RCVD': 'R', 'QSL_SENT': 'Y', 'EQSL_QSL_RCVD': "", 'EQSL_QSL_SENT': "",
+                      'LOTW_QSL_RCVD':"" , 'LOTW_QSL_SENT':"" ,
                       'COUNTRY': 'Swiss', 'STATE': 'VS'}
         self.window.fill_values_to_edit_form(input_data)
         output = self.window.get_dict_from_inputform()
