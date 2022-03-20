@@ -293,24 +293,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.all_dxcc = get_dxcc_from_callsign(callsign)
         except TypeError:
-            show_error_message("No QRZ-info found", f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
+            show_error_message("No QRZ-info found",
+                               f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
             return
-        self.set_time_and_country_after_call()
+        self.set_time_after_callsign_enter()
+        self.auto_enter_dxcc_infos_from_callsign()
 
-    def set_time_and_country_after_call(self):
-        # Improvement for better User experience
-        # Todo: Make Function to get Country from Prefix
-        # if not self.ui.le_country.text():
-        # self.ui.le_country.setText("Todo")
-        # Set Time to this:
+    def set_time_after_callsign_enter(self):
+        # if time not changed, set to now:
         if self.ui.timeEdit.time().toString("HHmmss") == '000000':
             if self.ui.dateEdit.date().toString("yyyyMMdd") == '20000101':
-                self.update_date_and_time_for_new_qso()
+                self.set_gui_date_and_time_to_now()
+
+    def auto_enter_dxcc_infos_from_callsign(self):
+        # Improvement for better User experience
         if len(self.all_dxcc) > 0:
-            self.ui.le_country.setText(self.all_dxcc['Country'])
-            self.ui.le_continent.setText(self.all_dxcc['Continent'])
-            self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
-            self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
+            if self.all_dxcc['Country']:
+                if not self.ui.le_country.text():
+                    self.ui.le_country.setText(self.all_dxcc['Country'])
+            if self.all_dxcc['Continent']:
+                if not self.ui.le_continent.text():
+                    self.ui.le_continent.setText(self.all_dxcc['Continent'])
+            if self.all_dxcc['ITUZone']:
+                if not self.ui.le_itu.text():
+                    self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
+            if self.all_dxcc['CQZone']:
+                if not self.ui.le_cq.text():
+                    self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
 
     def set_frequency_from_band(self):
         # check if freq is empty!
@@ -337,7 +346,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.proxyModel.setFilterKeyColumn(0)
         self.proxyModel.setFilterRegExp(QRegExp(text, Qt.CaseInsensitive, QRegExp.FixedString))
 
-    def update_date_and_time_for_new_qso(self):
+    def set_gui_date_and_time_to_now(self):
         self.ui.timeEdit.setTime(QDateTime.currentDateTimeUtc().time())
         self.ui.dateEdit.setDate(QDateTime.currentDateTime().date())
 
