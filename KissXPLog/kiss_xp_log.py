@@ -235,8 +235,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cdw.show()
 
     def start_timed_autosave_thread(self):
-        print(f"Threads activ: {threading.enumerate()}")
         if self.timed_autosave_thread and self.autosave_interval:
+            print(f"Threads activ: {threading.enumerate()}")
             logging.debug(f"Start Autosave Thread..")
             self.timed_autosave_thread = threading.Timer(self.autosave_interval, self.start_timed_autosave_thread)
             self.timed_autosave_thread.daemon = True

@@ -1,14 +1,8 @@
 from unittest import TestCase
-from unittest.mock import patch
 
-import keyboard
-from PyQt5 import QtCore
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QDialog
+from PyQt5.QtWidgets import QApplication
 
-from KissXPLog import MainWindow, UserConfig
-from KissXPLog.dialog.config_dialog import ConfigDialog
-from KissXPLog.dialog.filter_dialog import FilterDialog
+from KissXPLog import MainWindow
 
 
 class TestShowUserSettingsInConfigDialog(TestCase):
@@ -42,13 +36,3 @@ class TestShowUserSettingsInConfigDialog(TestCase):
         self.window.autosave_interval = 42
         self.window.cdw.load_config()
         self.assertEqual(42, self.window.cdw.ui2.cb_autosave_interval.value())
-
-    # def test_custom_bands(self):
-    #     self.window.bands = {'': [0, 0], '40m': [7.0, 7.3], '20m': [14.0, 14.35]}
-    #     self.window.cdw.load_config()
-    #     self.window.cdw.show_bands_filter_dialog()
-    #     print("test")
-
-
-
-

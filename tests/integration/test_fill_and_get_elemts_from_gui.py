@@ -17,7 +17,7 @@ class TestJsonFileHandling(TestCase):
                       'BAND': '40m', 'FREQ': '7', 'NAME': 'JohnDoe', 'NOTES': 'notes?', 'COMMENT': 'nope',
                       'QSL_RCVD': 'R', 'QSL_SENT': 'Y', 'EQSL_QSL_RCVD': "", 'EQSL_QSL_SENT': "",
                       'LOTW_QSL_RCVD':"" , 'LOTW_QSL_SENT':"" ,
-                      'COUNTRY': 'Swiss', 'STATE': 'VS'}
+                      'COUNTRY': 'Switzerland', 'STATE': 'VS'}
         self.window.fill_values_to_edit_form(input_data)
         output = self.window.get_dict_from_inputform()
         self.assertDictEqual(input_data, output)
