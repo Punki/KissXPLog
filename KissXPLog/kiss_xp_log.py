@@ -124,7 +124,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.newAction = QAction("&New", self)
         self.discardAction = QAction("&Discard", self)
         self.editTableAction = QAction("&Edit Table", self)
-        self.getNewPlistAction =QAction("&Update Plist")
+        self.getNewPlistAction = QAction("&Update Plist")
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
@@ -153,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.currentIndexChanged.connect(self.set_default_rst)
         # Call should always be Uppercase
         self.ui.le_call.textChanged.connect(lambda: self.ui.le_call.setText(self.ui.le_call.text().upper()))
-        #Enable Cantons if Country is Swiss
+        # Enable Cantons if Country is Swiss
         self.ui.le_country.textChanged.connect(self.enable_canton_if_swiss)
         # Fill the Submodes from Mode select
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
@@ -291,13 +291,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def dxcc_lookup(self, callsign):
         try:
-            self.all_dxcc = get_dxcc_from_callsign(callsign)
+            all_dxcc = get_dxcc_from_callsign(callsign)
         except TypeError:
             show_error_message("No QRZ-info found",
                                f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
             return
         self.set_time_after_callsign_enter()
-        self.auto_enter_dxcc_infos_from_callsign()
+        self.auto_enter_dxcc_infos_from_callsign(all_dxcc)
 
     def set_time_after_callsign_enter(self):
         # if time not changed, set to now:
@@ -305,21 +305,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.ui.dateEdit.date().toString("yyyyMMdd") == '20000101':
                 self.set_gui_date_and_time_to_now()
 
-    def auto_enter_dxcc_infos_from_callsign(self):
+    def auto_enter_dxcc_infos_from_callsign(self, all_dxcc):
         # Improvement for better User experience
-        if len(self.all_dxcc) > 0:
-            if self.all_dxcc['Country']:
+        if len(all_dxcc) > 0:
+            if all_dxcc['Country']:
                 if not self.ui.le_country.text():
-                    self.ui.le_country.setText(self.all_dxcc['Country'])
-            if self.all_dxcc['Continent']:
+                    self.ui.le_country.setText(all_dxcc['Country'])
+            if all_dxcc['Continent']:
                 if not self.ui.le_continent.text():
-                    self.ui.le_continent.setText(self.all_dxcc['Continent'])
-            if self.all_dxcc['ITUZone']:
+                    self.ui.le_continent.setText(all_dxcc['Continent'])
+            if all_dxcc['ITUZone']:
                 if not self.ui.le_itu.text():
-                    self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
-            if self.all_dxcc['CQZone']:
+                    self.ui.le_itu.setText(str(all_dxcc['ITUZone']))
+            if all_dxcc['CQZone']:
                 if not self.ui.le_cq.text():
-                    self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
+                    self.ui.le_cq.setText(str(all_dxcc['CQZone']))
 
     def set_frequency_from_band(self):
         # check if freq is empty!
