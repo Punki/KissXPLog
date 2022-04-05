@@ -62,7 +62,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.custom_fields_list = []
 
         self.modes = MODES_WITH_SUBMODE
-        self.cantons = CANTONS
+        self.ui.cb_canton.setDisabled(True)
 
         # Load Config File
         self.user_config = UserConfig()
@@ -89,7 +89,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Fill in Comboboxes
         self.ui.cb_band.addItems(self.bands)
         self.ui.cb_mode.addItems(self.modes)
-        self.ui.cb_canton.addItems(self.cantons)
         self.ui.cbo_sent_options.addItems(QSL_SENT_ENUMERATION)
         self.ui.cbo_rcvd_options.addItems(QSL_RCVD_ENUMERATION)
 
@@ -158,6 +157,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.currentIndexChanged.connect(self.set_default_rst)
         # Call should always be Uppercase
         self.ui.le_call.textChanged.connect(lambda: self.ui.le_call.setText(self.ui.le_call.text().upper()))
+        #Enable Cantons if Country is Swiss
+        self.ui.le_country.textChanged.connect(self.enable_canton_if_swiss)
+
         # Fill the Submodes from Mode select
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
 
@@ -263,6 +265,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def auto_timer_dev(self, wait_in_sec):
         threading.Timer(wait_in_sec, lambda: self.auto_timer_dev(wait_in_sec)).start()
         self.print_something_useful()
+
+    def enable_canton_if_swiss(self):
+        if self.ui.le_country.text() == 'Switzerland':
+            self.ui.cb_canton.setDisabled(False)
+            self.ui.cb_canton.addItems(CANTONS)
+        else:
+            self.ui.cb_canton.setDisabled(True)
 
     def fill_in_sub_modes(self):
         self.ui.cb_submodes.clear()
@@ -545,8 +554,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
         self.ui.le_comment.setText(edit_QSO_dict.get('COMMENT'))
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
-        # Todo Check if County is Swiss
-        self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
+        if self.ui.le_country.text() == 'Switzerland':
+            self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
+
         # FixMe Check for None Value! >> None should be '' in Gui!
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'

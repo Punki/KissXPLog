@@ -115,3 +115,17 @@ class TestAutoEnterDxccInfosFromCallsign(TestCase):
         self.assertEqual("", self.window.ui.le_continent.text())
         self.assertEqual("", self.window.ui.le_itu.text())
         self.assertEqual("", self.window.ui.le_cq.text())
+
+    def test_enable_canton_field_if_country_is_swiss(self):
+        self.window.ui.cb_canton.setDisabled(True)
+        self.window.ui.le_country.setText('Switzerland')
+        self.assertTrue(self.window.ui.cb_canton.isEnabled())
+
+    def test_disable_canton_if_country_is_not_swiss(self):
+        self.window.ui.cb_canton.setDisabled(False)
+        self.window.ui.le_country.setText('Not_Switzerland')
+        self.assertFalse(self.window.ui.cb_canton.isEnabled())
+
+
+
+
