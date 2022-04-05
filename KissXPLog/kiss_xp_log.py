@@ -56,7 +56,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.all_dxcc = {}
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
-                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD',
+                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD','QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD',
                           'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME', 'NOTES']
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
@@ -98,6 +98,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.ui.dateEdit.setMaximumDate(QDate.currentDate())
         self.ui.dateEdit.setCalendarPopup(True)
+
+        # self.ui.de_qsl_sent_date.setDate(QDate.currentDate())
+        self.ui.de_qsl_sent_date.setDisabled(True)
 
         # Filtern der Spalten mit Button
         currentQMenu = QMenu()
@@ -157,6 +160,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_country.textChanged.connect(self.enable_canton_if_swiss)
         # Fill the Submodes from Mode select
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
+        # Activate and set Sent Date to today if Card is Send
+        self.ui.cbo_sent_options.currentIndexChanged.connect(self.activate_and_set_Date_if_sent)
 
         # Connect File actions
         self.configAction.triggered.connect(self.show_config_window)
@@ -256,6 +261,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def auto_timer_dev(self, wait_in_sec):
         threading.Timer(wait_in_sec, lambda: self.auto_timer_dev(wait_in_sec)).start()
         self.print_something_useful()
+
+    def activate_and_set_Date_if_sent(self):
+        if self.ui.cbo_sent_options.currentText() == 'Yes':
+            self.ui.de_qsl_sent_date.setDisabled(False)
+            # Only set Current Date if not already set..
+            if self.ui.de_qsl_sent_date.date().toString("yyyyMMdd") == "20000101":
+                self.ui.de_qsl_sent_date.setDate(QDate.currentDate())
+        else:
+            self.ui.de_qsl_sent_date.setDisabled(True)
+            self.ui.de_qsl_sent_date.setDate(QDate.fromString("20000101", "yyyyMMdd"))
 
     def enable_canton_if_swiss(self):
         if self.ui.le_country.text() == 'Switzerland':
@@ -385,6 +400,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                    'QSL_RCVD': QSL_RCVD_ENUMERATION.get(self.ui.cbo_rcvd_options.currentText())[0],
                    'QSL_SENT': QSL_SENT_ENUMERATION.get(self.ui.cbo_sent_options.currentText())[0],
+                   'QSLSDATE': (
+                       self.ui.de_qsl_sent_date.date().toString(
+                           "yyyyMMdd") if self.ui.de_qsl_sent_date.isEnabled() else ""),
 
                    'EQSL_QSL_RCVD': True if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
                    'EQSL_QSL_SENT': True if self.ui.cb_eqsl_sent_new.isChecked() else '',
@@ -428,6 +446,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.ui.cbo_rcvd_options.setCurrentIndex(0)
         self.ui.cbo_sent_options.setCurrentIndex(0)
+        self.ui.de_qsl_sent_date.setDate(QDate.fromString("20000101", "yyyyMMdd"))
 
         self.ui.cb_eqsl_rcvd_new.setChecked(False)
         self.ui.cb_eqsl_sent_new.setChecked(False)
@@ -547,13 +566,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_name.setText(edit_QSO_dict.get('NAME'))
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
         self.ui.le_comment.setText(edit_QSO_dict.get('COMMENT'))
+        self.ui.de_qsl_sent_date.setDate(QDate.fromString(edit_QSO_dict.get('QSLSDATE'), "yyyyMMdd"))
+
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
         if self.ui.le_country.text() == 'Switzerland':
             self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
 
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
-        #
         for key, value in QSL_RCVD_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_RCVD'):
                 self.ui.cbo_rcvd_options.setCurrentText(key)
