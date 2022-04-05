@@ -190,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
+
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)
         print(f"Threads activ: {threading.enumerate()}")
@@ -431,6 +432,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.te_notes.clear()
         self.ui.le_country.clear()
         self.ui.cb_canton.setCurrentIndex(0)
+        self.ui.le_continent.clear()
+        self.ui.le_cq.clear()
+        self.ui.le_itu.clear()
 
         self.ui.cbo_rcvd_options.setCurrentIndex(0)
         self.ui.cbo_sent_options.setCurrentIndex(0)
@@ -557,9 +561,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.ui.le_country.text() == 'Switzerland':
             self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
 
-        # FixMe Check for None Value! >> None should be '' in Gui!
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
+        #
         for key, value in QSL_RCVD_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_RCVD'):
                 self.ui.cbo_rcvd_options.setCurrentText(key)
