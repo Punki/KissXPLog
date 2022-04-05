@@ -141,12 +141,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editMenu.addAction(self.discardAction)
         editMenu.addAction(self.editTableAction)
 
-    def _createFullDevMenu(self):
-        self.new_dev_menu_method = QAction("Simple Thread", self)
-        devMenu = self.menuBar().addMenu("&DEV")
-        devMenu.addAction(self.new_dev_menu_method)
-        # self.new_dev_menu_method.triggered.connect(get_new_plist)
-
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
         self.ui.le_call.editingFinished.connect(self.new_dxcc_lookup_thread)
@@ -190,7 +184,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
-
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)
         print(f"Threads activ: {threading.enumerate()}")
@@ -210,11 +203,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.autosave:
             if self.autosave_interval == 0:
                 self.autosave_to_file()
-
-    def new_thread_methoden_test(self):
-        t = threading.Thread(target=self.print_something_useful, daemon=True)
-        print(f"Threads activ: {threading.enumerate()}")
-        t.start()
 
     def load_user_settings(self):
         logging.info(f"Loaded User Config.")
