@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog import UserConfig
+from KissXPLog import UserConfig, config
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
     frequency_to_band
 from KissXPLog.const_adif_fields import QSL_RCVD_ENUMERATION, QSL_SENT_ENUMERATION, MODES_WITH_SUBMODE, \
@@ -19,7 +19,7 @@ from KissXPLog.dialog.config_dialog import ConfigDialog
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
-from KissXPLog.qrz_lookup import get_dxcc_from_callsign
+from KissXPLog.qrz_lookup import get_dxcc_from_callsign, update_plist
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
     prune_qsos
 from KissXPLog.table_model import TableModel
@@ -124,6 +124,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.newAction = QAction("&New", self)
         self.discardAction = QAction("&Discard", self)
         self.editTableAction = QAction("&Edit Table", self)
+        self.getNewPlistAction =QAction("&Update Plist")
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
@@ -140,6 +141,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editMenu.addAction(self.newAction)
         editMenu.addAction(self.discardAction)
         editMenu.addAction(self.editTableAction)
+        editMenu.addAction(self.getNewPlistAction)
 
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
@@ -153,7 +155,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_call.textChanged.connect(lambda: self.ui.le_call.setText(self.ui.le_call.text().upper()))
         #Enable Cantons if Country is Swiss
         self.ui.le_country.textChanged.connect(self.enable_canton_if_swiss)
-
         # Fill the Submodes from Mode select
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
 
@@ -168,6 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.newAction.triggered.connect(self.clear_new_log_entry_form)
         self.discardAction.triggered.connect(self.reset_form)
         self.editTableAction.triggered.connect(self.edit_qso_table_switch)
+        self.getNewPlistAction.triggered.connect(lambda: update_plist(config.plist_path))
         # Connect Help actions
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
