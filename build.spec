@@ -21,14 +21,35 @@ a = Analysis(['KissXPLog/__init__.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-if sys.platform == 'win32' or sys.platform == 'win64' or sys.platform == 'linux':
+if sys.platform == 'win32' or sys.platform == 'win64':
 	exe = EXE(pyz,
 		  a.scripts,
 		  a.binaries,
 		  a.zipfiles,
 		  a.datas,  
 		  [],
-		  name='KissXPLog_DEV',
+		  name='KissXPLog.exe',
+		  debug=False,
+		  bootloader_ignore_signals=False,
+		  strip=False,
+		  upx=True,
+		  upx_exclude=[],
+		  runtime_tmpdir=None,
+		  console=False,
+		  disable_windowed_traceback=False,
+		  target_arch=None,
+		  codesign_identity=None,
+		  entitlements_file=None )
+
+
+if sys.platform == 'linux':
+	exe = EXE(pyz,
+		  a.scripts,
+		  a.binaries,
+		  a.zipfiles,
+		  a.datas,  
+		  [],
+		  name='KissXPLog',
 		  debug=False,
 		  bootloader_ignore_signals=False,
 		  strip=False,
