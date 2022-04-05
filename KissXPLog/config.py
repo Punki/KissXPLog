@@ -10,7 +10,12 @@ config_file = os.path.join(data_dir, "config.json")
 class UserConfig:
     def __init__(self):
         self.user_settings = {}
-        self.user_settings = self.load_user_settings_from_file()
+        if os.path.exists(config_file):
+            self.user_settings = self.load_user_settings_from_file()
+        else:
+            self.create_default_value_user_config()
+
+    def create_default_value_user_config(self):
         if not self.user_settings:
             self.user_settings['Autosave'] = False
             self.user_settings['AutosaveIntervall'] = 10
