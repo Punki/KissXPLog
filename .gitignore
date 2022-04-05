@@ -12,3 +12,6 @@
 /KissXPLog/data/
 /KissXPLog/build_stuff/*/
 **/KissXPLog.log**
+
+#Test
+tests/tmp/**
