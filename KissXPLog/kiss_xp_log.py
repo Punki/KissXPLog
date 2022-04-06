@@ -197,11 +197,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         devMenu.addAction(self.new_dev_menu_method)
         devMenu.addAction(self.dev_fill_up_fields_menu_method)
         devMenu.addAction(self.dev_new_file)
+        devMenu.addAction(self.dev_open_file)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
         self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
         self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
+        self.dev_open_file.triggered.connect(self.dev_open_file_menu_triggered)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
@@ -228,6 +230,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def dev_new_menu_triggered(self):
         self.close()
         self.__init__()
+
+    def dev_open_file_menu_triggered(self):
+        self.dev_new_menu_triggered()
+        self.json_load_file_chooser()
+
 
 
 
