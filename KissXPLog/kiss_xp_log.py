@@ -180,18 +180,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
 
+    #New > Schliesse bisherige Table >> Save ja/nein, erstelle empty DB.
+    #Open > Schliesse bisherige Table >> Save ja/nein, öffne neue DB.
+    #Update > Füge Neue Daten zu bestehender DB hinzu.
+
     def _createFullDevMenu(self):
         self.new_dev_menu_method = QAction("Simple Thread", self)
         # self.devTimePrintAction = QAction("&Print with Timer", self)
         # self.devAutosaveAction = QAction("&Enable Autosave", self)
         self.dev_fill_up_fields_menu_method = QAction("AutoFill Fields", self)
+        self.dev_new_file = QAction("New File", self)
+        self.dev_open_file = QAction("Open File", self)
+        self.dev_update_file = QAction("Update File", self)
+
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
         devMenu.addAction(self.dev_fill_up_fields_menu_method)
+        devMenu.addAction(self.dev_new_file)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
         self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
+        self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
@@ -214,6 +224,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.setCurrentIndex(self.ui.cb_mode.findText("CW"))
         self.ui.cb_band.setCurrentIndex(self.ui.cb_band.findText("80m"))
         self.ui.cbo_sent_options.setCurrentIndex(self.ui.cbo_sent_options.findText("Yes"))
+
+    def dev_new_menu_triggered(self):
+        self.close()
+        self.__init__()
+
+
 
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
@@ -552,7 +568,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def save_or_edit_handler(self):
         # Called by SaveButton
-        self.set_do_we_have_unsaved_changes(False)
+        self.set_do_we_have_unsaved_changes(True)
         if self.update_qso:
             self.update_qso = False
             updated_qso = self.get_dict_from_inputform()
