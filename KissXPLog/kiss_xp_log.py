@@ -56,7 +56,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.all_dxcc = {}
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
-                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD','QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD',
+                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD', 'QSLSDATE', 'EQSL_QSL_SENT',
+                          'EQSL_QSL_RCVD',
                           'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME', 'NOTES']
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
@@ -183,11 +184,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.new_dev_menu_method = QAction("Simple Thread", self)
         # self.devTimePrintAction = QAction("&Print with Timer", self)
         # self.devAutosaveAction = QAction("&Enable Autosave", self)
+        self.dev_fill_up_fields_menu_method = QAction("AutoFill Fields", self)
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
+        devMenu.addAction(self.dev_fill_up_fields_menu_method)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
+        self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
@@ -203,6 +207,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_call.setText("Gogogo...")
         sleep(10)
         print("after Sleep..")
+
+    def dev_fill_all_fields(self):
+        self.ui.le_call.setText("HB9")
+        self.new_dxcc_lookup_thread()
+        self.ui.cb_mode.setCurrentIndex(self.ui.cb_mode.findText("CW"))
+        self.ui.cb_band.setCurrentIndex(self.ui.cb_band.findText("80m"))
+        self.ui.cbo_sent_options.setCurrentIndex(self.ui.cbo_sent_options.findText("Yes"))
 
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
@@ -402,7 +413,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    'QSL_SENT': QSL_SENT_ENUMERATION.get(self.ui.cbo_sent_options.currentText())[0],
                    'QSLSDATE': (
                        self.ui.de_qsl_sent_date.date().toString(
-                           "yyyyMMdd") if self.ui.de_qsl_sent_date.isEnabled() else ""),
+                           "yyyyMMdd") if self.ui.de_qsl_sent_date.isEnabled() else ''),
 
                    'EQSL_QSL_RCVD': True if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
                    'EQSL_QSL_SENT': True if self.ui.cb_eqsl_sent_new.isChecked() else '',
