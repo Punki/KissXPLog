@@ -249,9 +249,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("Cancel")
 
     def dev_open_file_menu_triggered(self):
-        self.close()
-        self.__init__()
-        self.json_load_file_chooser()
+        if self.save_unsaved_changes():
+            self.model.add_new_qsos_list([])
+            self.json_load_file_chooser()
+            # Todo set as default file to open >>Config
 
     def dev_update_opened_file_with_stuff(self):
         self.dev_load_file_chooser()
@@ -653,15 +654,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_rcvd_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_RCVD') else False)
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
-    def closeEvent(self, event):
+    def save_unsaved_changes(self):
         if self._do_we_have_unsaved_changes:
             reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 if self.json_save_file_chooser():
-                    event.accept()
-                else:
-                    event.ignore()
+                    return True
+            elif reply == QMessageBox.No:
+                return True
+
+    def closeEvent(self, event):
+        if self.save_unsaved_changes():
+            event.accept()
+        else:
+            event.ignore()
 
         # self.stop_timed_autosave_thread()
-        print("Im Done with this...")
+
+    print("Im Done with this...")
