@@ -17,8 +17,8 @@ class TestJsonFileHandling(TestCase):
                       'MODE': 'JT65', 'SUBMODE': 'JT65A', 'RST_SENT': '-18', 'RST_RCVD': '-23',
                       'BAND': '40m', 'FREQ': '7', 'NAME': 'JohnDoe', 'NOTES': 'notes?', 'COMMENT': 'nope',
                       'QSL_RCVD': 'R', 'QSL_SENT': 'Y', 'EQSL_QSL_RCVD': "", 'EQSL_QSL_SENT': "",
-                      'LOTW_QSL_RCVD': "", 'LOTW_QSL_SENT': "",
-                      'COUNTRY': 'Switzerland', 'STATE': 'VS', 'QSLSDATE': '20221231'}
+                      'LOTW_QSL_RCVD': "", 'LOTW_QSL_SENT': "", 'COUNTRY': 'Switzerland', 'STATE': 'VS',
+                      'QSLSDATE': '20221231', 'CQZone': '', 'Continent': '', 'ITUZone': ''}
         self.window.fill_values_to_edit_form(input_data)
         output = self.window.get_dict_from_inputform()
         self.assertDictEqual(input_data, output)
@@ -130,9 +130,11 @@ class TestJsonFileHandling(TestCase):
     def test_qslSentDate_is_invalid(self):
         input_data = {'QSL_SENT': 'Y', 'QSLSDATE': "999999999999999"}
         self.window.fill_values_to_edit_form(input_data)
-        self.assertEqual(QDate.currentDate().toString("yyyyMMdd"), self.window.ui.de_qsl_sent_date.date().toString("yyyyMMdd"))
+        self.assertEqual(QDate.currentDate().toString("yyyyMMdd"),
+                         self.window.ui.de_qsl_sent_date.date().toString("yyyyMMdd"))
 
     def test_qslSentDate_is_not_set(self):
         input_data = {'QSL_SENT': 'Y'}
         self.window.fill_values_to_edit_form(input_data)
-        self.assertEqual(QDate.currentDate().toString("yyyyMMdd"), self.window.ui.de_qsl_sent_date.date().toString("yyyyMMdd"))
+        self.assertEqual(QDate.currentDate().toString("yyyyMMdd"),
+                         self.window.ui.de_qsl_sent_date.date().toString("yyyyMMdd"))
