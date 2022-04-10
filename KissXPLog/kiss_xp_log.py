@@ -180,9 +180,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
 
-    #New > Schliesse bisherige Table >> Save ja/nein, erstelle empty DB.
-    #Open > Schliesse bisherige Table >> Save ja/nein, öffne neue DB.
-    #Update > Füge Neue Daten zu bestehender DB hinzu.
+    # New > Schliesse bisherige Table >> Save ja/nein, erstelle empty DB.
+    # Open > Schliesse bisherige Table >> Save ja/nein, öffne neue DB.
+    # Update > Füge Neue Daten zu bestehender DB hinzu.
 
     def _createFullDevMenu(self):
         self.new_dev_menu_method = QAction("Simple Thread", self)
@@ -198,12 +198,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         devMenu.addAction(self.dev_fill_up_fields_menu_method)
         devMenu.addAction(self.dev_new_file)
         devMenu.addAction(self.dev_open_file)
+        devMenu.addAction(self.dev_update_file)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
         self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
         self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
         self.dev_open_file.triggered.connect(self.dev_open_file_menu_triggered)
+        self.dev_update_file.triggered.connect(self.dev_update_opened_file_with_stuff)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
@@ -228,15 +230,42 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cbo_sent_options.setCurrentIndex(self.ui.cbo_sent_options.findText("Yes"))
 
     def dev_new_menu_triggered(self):
-        self.close()
-        self.__init__()
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setWindowTitle("Open in new Window?")
+        msg_box.setText("Open in this Window or New Window?")
+        overrideWindowBtn = msg_box.addButton('Use This Window..', QMessageBox.NoRole)
+        newWindowBtn = msg_box.addButton('Open New One', QMessageBox.NoRole)
+        cancelBtn = msg_box.addButton('Cancel', QMessageBox.RejectRole)
+        msg_box.exec_()
+        if msg_box.clickedButton() == overrideWindowBtn:
+            print("Override")
+            self.close()
+            self.__init__()
+        elif msg_box.clickedButton() == newWindowBtn:
+            print("New Window")
+            self.__init__()
+        elif msg_box.clickedButton() == cancelBtn:
+            print("Cancel")
 
     def dev_open_file_menu_triggered(self):
-        self.dev_new_menu_triggered()
+        self.close()
+        self.__init__()
         self.json_load_file_chooser()
 
+    def dev_update_opened_file_with_stuff(self):
+        self.dev_load_file_chooser()
 
-
+    def dev_load_file_chooser(self):
+        logging.debug("Open DEV File Select for Load")
+        filedialog = initial_file_dialog_config("adi_json")
+        filedialog.setWindowTitle('Choose file to open')
+        filedialog.setFileMode(QFileDialog.ExistingFile)
+        filedialog.setAcceptMode(QFileDialog.AcceptOpen)
+        if filedialog.exec_():
+            filename = filedialog.selectedFiles()[0]
+            logging.debug(f"File {filename} will be loaded")
+            self.generic_load_file_to_table(filename)
 
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
