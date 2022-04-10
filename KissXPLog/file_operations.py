@@ -21,6 +21,8 @@ def initial_file_dialog_config(file_extension):
         filedialog.setDefaultSuffix("adi")
         filedialog.setNameFilter("Adif (*.adi);;All files (*.*)")
         filedialog.selectFile("QSO_Export.adi")
+    elif file_extension == "adi_json":
+        filedialog.setNameFilter("(*.adi, *.json);;All files (*.*)")
     else:
         logging.error(f"Data Type is not supported: {file_extension}")
 
