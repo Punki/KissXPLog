@@ -56,9 +56,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.all_dxcc = {}
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
-                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD', 'QSLSDATE', 'EQSL_QSL_SENT',
-                          'EQSL_QSL_RCVD',
-                          'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME', 'NOTES']
+                          'DXCC', 'COUNTRY', 'STATE', 'Continent', 'ITUZone', 'CQZone', 'QSL_SENT', 'QSL_RCVD',
+                          'QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME',
+                          'NOTES']
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
 
@@ -475,7 +475,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    'LOTW_QSL_SENT': True if self.ui.cb_lotw_sent_new.isChecked() else '',
 
                    'COUNTRY': self.ui.le_country.text(),
-                   'STATE': self.ui.cb_canton.currentText()
+                   'STATE': self.ui.cb_canton.currentText(),
+                   'Continent': self.ui.le_continent.text(),
+                   'ITUZone': self.ui.le_itu.text(),
+                   'CQZone': self.ui.le_cq.text()
                    }
         return new_qso
 
@@ -559,6 +562,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File will be saved to {filename}")
             generic_save_data_to_file(filename, self.model.get_data_from_table())
+            self.set_do_we_have_unsaved_changes(False)
             return True
 
     def json_load_file_chooser(self):
@@ -635,6 +639,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
         if self.ui.le_country.text() == 'Switzerland':
             self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
+        self.ui.le_continent.setText(edit_QSO_dict.get('Continent'))
+        self.ui.le_itu.setText(edit_QSO_dict.get('ITUZone'))
+        self.ui.le_cq.setText(edit_QSO_dict.get('CQZone'))
+
 
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
