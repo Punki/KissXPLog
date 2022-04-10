@@ -643,7 +643,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_itu.setText(edit_QSO_dict.get('ITUZone'))
         self.ui.le_cq.setText(edit_QSO_dict.get('CQZone'))
 
-
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
         for key, value in QSL_RCVD_ENUMERATION.items():
@@ -667,10 +666,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
-                if self.json_save_file_chooser():
-                    return True
-            elif reply == QMessageBox.No:
-                return True
+                return self.json_save_file_chooser()
+        else:
+            return True
 
     def closeEvent(self, event):
         if self.save_unsaved_changes():
