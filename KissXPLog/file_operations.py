@@ -17,7 +17,7 @@ def initial_file_dialog_config(file_extension):
         filedialog.setDefaultSuffix("json")
         filedialog.setNameFilter("Json Datenbank (*.json);;All files (*.*)")
         filedialog.selectFile("QSO_MGM_Export.json")
-    elif file_extension == "adif" or "adi":
+    elif file_extension == ("adif" or "adi"):
         filedialog.setDefaultSuffix("adi")
         filedialog.setNameFilter("Adif (*.adi);;All files (*.*)")
         filedialog.selectFile("QSO_Export.adi")
@@ -41,7 +41,7 @@ def generic_save_data_to_file(filename, data_to_write, exclude_fields=None):
 
 
 def read_data_from_json_file(file_to_read_from):
-    data={}
+    data = {}
     try:
         with open(file_to_read_from, "r") as json_file:
             data = json.load(json_file)
