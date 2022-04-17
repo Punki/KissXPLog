@@ -52,18 +52,18 @@ jobs:
       with:
         #requirements: requirements.txt
         path: .
-    - name: Upload Windows EXE
+    - name: Upload Binaries
       uses: actions/upload-artifact@v3.0.0
       with:
         # Artifact name
-        name: KissXPLog.exe
+        name: KissXPLog
         # A file, directory or wildcard pattern that describes what to upload
-        path: dist/KissXPLog.exe
-    - name: Upload Linux Binary
-      uses: actions/upload-artifact@v3.0.0
-      with:
-        # Artifact name
-        name: KissXPLog.exe
-        # A file, directory or wildcard pattern that describes what to upload
-        path: dist/KissXPLog
+        path: ./dist/
+#    - name: Upload Linux Binary
+#      uses: actions/upload-artifact@v3.0.0
+#      with:
+#        # Artifact name
+#        name: KissXPLog.bin
+#        # A file, directory or wildcard pattern that describes what to upload
+#        path: dist/KissXPLog
 
