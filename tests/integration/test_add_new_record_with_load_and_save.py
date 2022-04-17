@@ -71,7 +71,7 @@ class TestJsonFileHandling(unittest.TestCase):
         write_file_as_json(self.json_outputfile_name, self.data_to_write)
 
         # Load File in Table
-        self.window.generic_load_file_to_table(self.json_outputfile_name)
+        self.window.load_file_to_table(self.json_outputfile_name)
 
         # Fill Input Form
         self.add_some_new_data_to_table()
@@ -92,7 +92,7 @@ class TestJsonFileHandling(unittest.TestCase):
         adif.export_to_adif(self.adif_outputfile_name, self.data_to_write, self.window.custom_fields_list)
 
         # Load File in Table
-        self.window.generic_load_file_to_table(self.adif_outputfile_name)
+        self.window.load_file_to_table(self.adif_outputfile_name)
 
         # Fill Input Form
         self.add_some_new_data_to_table()

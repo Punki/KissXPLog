@@ -10,27 +10,24 @@ class SaveAndLoadToFileTest(TestCase):
 
     # File extension JSON
     @patch('KissXPLog.kiss_xp_log.read_data_from_json_file')
-    def test_generic_load_file_to_table_json(self, mock):
+    def test_load_file_to_table_json(self, mock):
         mc = MagicMock()
-        MainWindow.generic_load_file_to_table(mc, "someFile.json")
+        MainWindow.generic_load_file(mc, "someFile.json")
         mock.assert_called_once_with("someFile.json")
-        mc.model.add_new_qsos_list.assert_called()
 
     # File extension ADI
     @patch('KissXPLog.kiss_xp_log.parse_adif_for_data')
-    def test_generic_load_file_to_table_adi(self, mock):
+    def test_generic_load_file_adi(self, mock):
         mc = MagicMock()
-        MainWindow.generic_load_file_to_table(mc, "someFile.adi")
+        MainWindow.generic_load_file(mc, "someFile.adi")
         mock.assert_called_once_with("someFile.adi")
-        mc.model.add_new_qsos_list.assert_called()
 
     # File extension ADI
     @patch('KissXPLog.kiss_xp_log.parse_adif_for_data')
-    def test_generic_load_file_to_table_adif(self, mock):
+    def test_load_file_to_table_adif(self, mock):
         mc = MagicMock()
-        MainWindow.generic_load_file_to_table(mc, "someFile.adif")
+        MainWindow.generic_load_file(mc, "someFile.adif")
         mock.assert_called_once_with("someFile.adif")
-        mc.model.add_new_qsos_list.assert_called()
 
     # File extension JSON
     @patch('KissXPLog.file_operations.write_file_as_json')
@@ -60,7 +57,7 @@ class SaveAndLoadToFileTest(TestCase):
 
         mock_self = MagicMock()
         MainWindow.adif_load_file_chooser(mock_self)
-        mock_self.generic_load_file_to_table.assert_called_once_with(my_adi_file)
+        mock_self.load_file_to_table.assert_called_once_with(my_adi_file)
 
     # Check if the Method gets Called Correctly
     @patch("KissXPLog.file_operations.QFileDialog")
@@ -72,7 +69,7 @@ class SaveAndLoadToFileTest(TestCase):
 
         mock_self = MagicMock()
         MainWindow.adif_load_file_chooser(mock_self)
-        mock_self.generic_load_file_to_table.assert_called_once_with(my_adi_file)
+        mock_self.load_file_to_table.assert_called_once_with(my_adi_file)
 
     # Check if the Method gets Called Correctly
     @patch("KissXPLog.file_operations.QFileDialog")
@@ -83,7 +80,7 @@ class SaveAndLoadToFileTest(TestCase):
 
         mock_self = MagicMock()
         MainWindow.json_load_file_chooser(mock_self)
-        mock_self.generic_load_file_to_table.assert_called_once_with(my_adi_file)
+        mock_self.load_file_to_table.assert_called_once_with(my_adi_file)
 
     # Check JSON read
     @patch("builtins.open", new_callable=mock_open, read_data=json.dumps({"CALL": "AAA", "MODE": "FT8"}))
