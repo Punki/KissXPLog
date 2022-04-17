@@ -47,7 +47,7 @@ if sys.platform == 'linux':
 		  a.zipfiles,
 		  a.datas,  
 		  [],
-		  name='KissXPLog',
+		  name='KissXPLog.exe',
 		  debug=False,
 		  bootloader_ignore_signals=False,
 		  strip=False,
@@ -68,5 +68,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='KissXPLog',
+    name='KissXPLog.exe',
 )
