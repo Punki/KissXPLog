@@ -1,0 +1,17 @@
+/venv/
+.idea/
+**/__pycache__/**
+**/core
+
+/KissXPLog/data/*
+/build/*
+/dist/*
+/KissXPLog/KissXPLog.log
+
+#Personal Stuff
+/KissXPLog/data/
+/KissXPLog/build_stuff/*/
+**/KissXPLog.log**
+
+#Test
+tests/tmp/**
