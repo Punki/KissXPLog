@@ -67,7 +67,7 @@ Jetzt kann mittels des installierten PyInstaller die ausführbare Datei erstellt
 pyinstaller --onefile build.spec
 ```
 
-Dieser Befehl erstellt mithilfe der [build.spec](build.spec) die Datei 'dist/KissXPLog_Dev(.exe)', mit welcher ihr
+Dieser Befehl erstellt mithilfe der [build.spec](KissXPLog/build.spec) die Datei 'dist/KissXPLog_Dev(.exe)', mit welcher ihr
 das Programm nun starten könnt.
 
 ## Virtual Environment (venv)
