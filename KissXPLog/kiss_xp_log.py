@@ -284,9 +284,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.load_file_to_table(filename)
 
     def dev_open_last_used_db(self):
-        db_path = self.user_config.user_settings.get('Last_Used_DB')
-        full_qso_db = self.generic_load_file(db_path)
-        self.model.add_new_qsos_list(full_qso_db)
+        if db_path := self.user_config.user_settings.get('Last_Used_DB'):
+            full_qso_db = self.generic_load_file(db_path)
+            self.model.add_new_qsos_list(full_qso_db)
 
     def dev_save_config_to_file(self):
         self.user_config.save_user_settings_to_file()
