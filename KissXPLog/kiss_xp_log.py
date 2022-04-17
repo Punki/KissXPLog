@@ -113,6 +113,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentQMenu.addAction(currentQAction)
         self.ui.bt_column_filter.setMenu(currentQMenu)
 
+        # DEV OpenLastUsedFile:
+        self.dev_open_last_used_db()
+
         # Start Autosave if Conditions are given:
         self.start_timed_autosave_thread()
 
@@ -192,6 +195,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_new_file = QAction("New File", self)
         self.dev_open_file = QAction("Open File", self)
         self.dev_update_file = QAction("Update File", self)
+        self.dev_save_config = QAction("Save Config", self)
 
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
@@ -199,6 +203,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         devMenu.addAction(self.dev_new_file)
         devMenu.addAction(self.dev_open_file)
         devMenu.addAction(self.dev_update_file)
+        devMenu.addAction(self.dev_save_config)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
@@ -206,6 +211,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
         self.dev_open_file.triggered.connect(self.dev_open_file_menu_triggered)
         self.dev_update_file.triggered.connect(self.dev_update_opened_file_with_stuff)
+        self.dev_save_config.triggered.connect(self.dev_save_config_to_file)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
@@ -242,17 +248,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print("Override")
             self.close()
             self.__init__()
+            self.reset_table_and_config_for_new_window()
         elif msg_box.clickedButton() == newWindowBtn:
             print("New Window")
             self.__init__()
+            self.reset_table_and_config_for_new_window()
         elif msg_box.clickedButton() == cancelBtn:
             print("Cancel")
+
+    def reset_table_and_config_for_new_window(self):
+        # Reset Config for new Windows
+        self.user_config.reset_fields_for_second_instance()
+        # Reset DB >> ToDo Cleaner Way than instanciate and remove afterwards..?!
+        self.model.add_new_qsos_list([])
 
     def dev_open_file_menu_triggered(self):
         if self.save_unsaved_changes():
             self.model.add_new_qsos_list([])
-            self.json_load_file_chooser()
-            # Todo set as default file to open >>Config
+            if filepath := self.json_load_file_chooser():
+                self.user_config.user_settings['Last_Used_DB'] = filepath
+                logging.debug(f"Set Last used DB to: {filepath}")
 
     def dev_update_opened_file_with_stuff(self):
         self.dev_load_file_chooser()
@@ -266,7 +281,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"File {filename} will be loaded")
-            self.generic_load_file_to_table(filename)
+            self.load_file_to_table(filename)
+
+    def dev_open_last_used_db(self):
+        db_path = self.user_config.user_settings.get('Last_Used_DB')
+        full_qso_db = self.generic_load_file(db_path)
+        self.model.add_new_qsos_list(full_qso_db)
+
+    def dev_save_config_to_file(self):
+        self.user_config.save_user_settings_to_file()
 
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
@@ -537,11 +560,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_new_log_entry_form()
         self.ui.tableView.sortByColumn(-1, Qt.AscendingOrder)
 
-    def generic_load_file_to_table(self, filename):
+    def load_file_to_table(self, filename):
+        loaded_data = self.generic_load_file(filename)
+        new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
+        new_clean_full_qso_list = prune_qsos(new_full_qso_list)
+        self.model.add_new_qsos_list(new_clean_full_qso_list)
+
+    def generic_load_file(self, filename):
         logging.debug("Load table from {} ...".format(filename))
         # file_extension = str(filename).strip().split(".", 1)[1]
         file_extension = str(filename).strip()
-        file_extension = re.search('\w*$', file_extension).group(0)
+        file_extension = re.search(r'\w*$', file_extension).group(0)
         if file_extension == "json":
             loaded_data = read_data_from_json_file(filename)
         elif file_extension == "adif" or file_extension == "adi":
@@ -549,9 +578,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             show_error_message("Error", f"Data Type is not supported: {file_extension}")
             return
-        new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
-        new_clean_full_qso_list = prune_qsos(new_full_qso_list)
-        self.model.add_new_qsos_list(new_clean_full_qso_list)
+        return loaded_data
 
     def json_save_file_chooser(self):
         logging.debug("Open File Select for Save in JSON")
@@ -574,7 +601,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File {filename} will be loaded")
-            self.generic_load_file_to_table(filename)
+            self.load_file_to_table(filename)
+            return filename
 
     def adif_save_file_chooser(self):
         logging.debug("Open File Select for Export in Adif")
@@ -596,7 +624,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"ADIF File {filename} will be imported")
-            self.generic_load_file_to_table(filename)
+            self.load_file_to_table(filename)
 
     def get_table_row_data(self, index):
         self.clear_new_log_entry_form()
@@ -677,5 +705,4 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             event.ignore()
 
         # self.stop_timed_autosave_thread()
-
-    print("Im Done with this...")
+        print("Im Done with this...")
