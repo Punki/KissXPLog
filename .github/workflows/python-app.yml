@@ -43,7 +43,7 @@ jobs:
       uses: JackMcKew/pyinstaller-action-windows@v0.1.2
       with:
         # Directory containing source code (optional requirements.txt).
-        requirements: requirements.txt
+        # requirements: requirements.txt
         path: KissXPLog
         spec: ./build.spec
     - name: PyInstaller Linux
@@ -51,7 +51,7 @@ jobs:
       # uses: JackMcKew/pyinstaller-action-linux@38639c352a36917eea765f9283bfd1092c28af7b
       uses: JackMcKew/pyinstaller-action-linux@0.1.4
       with:
-        requirements: requirements.txt
+        #requirements: requirements.txt
         path: KissXPLog
         spec: ./build.spec
     - name: Upload Windows EXE
