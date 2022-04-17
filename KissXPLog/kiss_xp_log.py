@@ -259,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def reset_table_and_config_for_new_window(self):
         # Reset Config for new Windows
         self.user_config.reset_fields_for_second_instance()
-        # Reset DB >> ToDo Cleaner Way than instanciate and remove afterwards..?!
+        # Reset DB >> ToDo Cleaner Way than instantiate and remove afterwards..?!
         self.model.add_new_qsos_list([])
 
     def dev_open_file_menu_triggered(self):
