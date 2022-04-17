@@ -24,10 +24,8 @@ pyz = PYZ(a.pure, a.zipped_data,
 if sys.platform == 'win32' or sys.platform == 'win64':
 	exe = EXE(pyz,
 		  a.scripts,
-		  a.binaries,
-		  a.zipfiles,
-		  a.datas,  
 		  [],
+		  exclude_binaries=True,
 		  name='KissXPLog.exe',
 		  debug=False,
 		  bootloader_ignore_signals=False,
@@ -61,3 +59,14 @@ if sys.platform == 'linux':
 		  target_arch=None,
 		  codesign_identity=None,
 		  entitlements_file=None )
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='KissXPLog',
+)
