@@ -56,14 +56,14 @@ jobs:
       uses: actions/upload-artifact@v3.0.0
       with:
         # Artifact name
-        name: KissXPLog
+        name: KissXPLog_Windows
         # A file, directory or wildcard pattern that describes what to upload
-        path: KissXPLog/dist/windows/
-    - name: Upload Linux Binary
-      uses: actions/upload-artifact@v3.0.0
-      with:
-        # Artifact name
-        name: KissXPLog.bin
-        # A file, directory or wildcard pattern that describes what to upload
-        path: KissXPLog/dist/linux/
+        path: KissXPLog/dist/__init__/
+#    - name: Upload Linux Binary
+#      uses: actions/upload-artifact@v3.0.0
+#      with:
+#        # Artifact name
+#        name: KissXPLog_Linux
+#        # A file, directory or wildcard pattern that describes what to upload
+#        path: KissXPLog/dist/__init__/
 
