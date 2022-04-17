@@ -5,7 +5,7 @@ import sys
 block_cipher = None
 
 
-a = Analysis(['KissXPLog\\__init__.py'],
+a = Analysis(['__init__.py'],
              pathex=[],
              binaries=[],
              datas=[],
