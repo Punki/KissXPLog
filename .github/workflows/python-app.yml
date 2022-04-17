@@ -45,7 +45,7 @@ jobs:
         # Directory containing source code (optional requirements.txt).
         # requirements: requirements.txt
         path: KissXPLog
-        spec: ./build.spec
+        spec: build.spec
     - name: PyInstaller Linux
       # You may pin to the exact commit or the version.
       # uses: JackMcKew/pyinstaller-action-linux@38639c352a36917eea765f9283bfd1092c28af7b
@@ -53,7 +53,7 @@ jobs:
       with:
         #requirements: requirements.txt
         path: KissXPLog
-        spec: ./build.spec
+        spec: build.spec
     - name: Upload Windows EXE
       uses: actions/upload-artifact@v3.0.0
       with:
