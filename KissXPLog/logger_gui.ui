@@ -307,13 +307,13 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>170</width>
             <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>500</width>
+            <width>200</width>
             <height>22</height>
            </size>
           </property>
@@ -323,13 +323,13 @@
          <widget class="QTextEdit" name="te_notes">
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>170</width>
             <height>100</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>500</width>
+            <width>200</width>
             <height>100</height>
            </size>
           </property>
@@ -458,6 +458,9 @@
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>

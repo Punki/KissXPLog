@@ -229,6 +229,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         print("after Sleep..")
 
     def dev_fill_all_fields(self):
+        # Just minimal infos for a valid Qso, dev only.
         self.ui.le_call.setText("HB9")
         self.new_dxcc_lookup_thread()
         self.ui.cb_mode.setCurrentIndex(self.ui.cb_mode.findText("CW"))
