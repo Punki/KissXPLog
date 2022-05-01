@@ -3,7 +3,7 @@
 **/__pycache__/**
 **/core
 *.pyo
-".bak
+*.bak
 
 /KissXPLog/data/*
 /build/*
