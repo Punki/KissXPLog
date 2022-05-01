@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt
       - name: Run PyInstaller
         run: |
-          python -m PyInstaller --debug KissXPLog/__init__.py
+          python -m PyInstaller --debug all KissXPLog/__init__.py
       - uses: actions/upload-artifact@main
         with:
           name: KissXPLog
