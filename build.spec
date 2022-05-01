@@ -43,9 +43,6 @@ if sys.platform == 'win32' or sys.platform == 'win64':
 if sys.platform == 'linux':
 	exe = EXE(pyz,
 		  a.scripts,
-		  a.binaries,
-		  a.zipfiles,
-		  a.datas,  
 		  [],
 		  name='KissXPLog',
 		  debug=False,
