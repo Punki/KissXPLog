@@ -46,7 +46,7 @@ if sys.platform == 'linux':
 		  a.zipfiles,
 		  a.datas,  
 		  [],
-		  name='KissXPLog.exe',
+		  name='KissXPLog',
 		  debug=False,
 		  bootloader_ignore_signals=False,
 		  strip=False,
