@@ -2,6 +2,7 @@
 .idea/
 **/__pycache__/**
 **/core
+*.pyo
 
 /KissXPLog/data/*
 /build/*

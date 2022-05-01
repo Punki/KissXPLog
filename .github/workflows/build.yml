@@ -20,14 +20,13 @@ jobs:
       - name: Install requirements
         run: |
           pip install -r requirements.txt
-          pip install pyinstaller
       - name: Run PyInstaller
         run: |
-          python -m PyInstaller build.spec
+          python -m PyInstaller --debug KissXPLog/__init__.py
       - uses: actions/upload-artifact@main
         with:
           name: KissXPLog
-          path: dist/KissXPLog
+          path: dist/__init__/
 
 #      - name: create release
 #        id: create_release
