@@ -196,6 +196,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_open_file = QAction("Open File", self)
         self.dev_update_file = QAction("Update File", self)
         self.dev_save_config = QAction("Save Config", self)
+        self.dev_change_title =QAction("Change Title", self)
 
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
@@ -204,6 +205,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         devMenu.addAction(self.dev_open_file)
         devMenu.addAction(self.dev_update_file)
         devMenu.addAction(self.dev_save_config)
+        devMenu.addAction(self.dev_change_title)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
@@ -212,6 +214,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_open_file.triggered.connect(self.dev_open_file_menu_triggered)
         self.dev_update_file.triggered.connect(self.dev_update_opened_file_with_stuff)
         self.dev_save_config.triggered.connect(self.dev_save_config_to_file)
+        self.dev_change_title.triggered.connect(self.dev_set_new_window_title)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
 
@@ -269,6 +272,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if filepath := self.json_load_file_chooser():
                 self.user_config.user_settings['Last_Used_DB'] = filepath
                 logging.debug(f"Set Last used DB to: {filepath}")
+                self.dev_set_new_window_title(f"File: {filepath}")
 
     def dev_update_opened_file_with_stuff(self):
         self.dev_load_file_chooser()
@@ -286,11 +290,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def dev_open_last_used_db(self):
         if db_path := self.user_config.user_settings.get('Last_Used_DB'):
+            self.dev_set_new_window_title(f"File: {db_path}")
             full_qso_db = self.generic_load_file(db_path)
             self.model.add_new_qsos_list(full_qso_db)
 
     def dev_save_config_to_file(self):
         self.user_config.save_user_settings_to_file()
+
+    def dev_set_new_window_title(self, title):
+        if title:
+            self.setWindowTitle(title)
+        else:
+            self.setWindowTitle("Title changed..")
 
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
