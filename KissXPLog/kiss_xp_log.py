@@ -8,7 +8,7 @@ from time import sleep
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
-from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox, QLineEdit
 
 from KissXPLog import UserConfig, config
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
@@ -27,9 +27,6 @@ from KissXPLog.table_model import TableModel
 
 # Fixme:
 # Not Saving is not Possible > BUG!
-# WIP:
-# red border on missing fields
-
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, load_user_settings=False, load_last_used_db=True):
@@ -531,27 +528,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.add_new_qso_method_two(new_qso)
             # self.model.add_new_qso_method_one(new_qso)
         else:
-            # Todo Show Hint which fields needs to edit for a minimal qso.. (ggf roter Rahmen über felder oä)
-            # check which element is missing and mark in gui >
-            print(f"Missing: {missing_fields}")
             show_error_message("No Valid QSO", "Please fill in all the required fields.")
+            all_possible_missing_fields = {'CALL': self.ui.le_call,
+                                           'FREQ': self.ui.le_freq,
+                                           'MODE': self.ui.cb_mode,
+                                           'RST_SENT': self.ui.le_rst_sent,
+                                           'RST_RCVD': self.ui.le_rst_rcvd}
 
-            possible_missing=[self.ui.le_call,self.ui.le_freq,self.ui.cb_mode,self.ui.le_rst_sent,self.ui.le_rst_rcvd]
-
-            for value in missing_fields:
-                match value:
-                    case 'CALL':
-                        self.ui.le_call.setStyleSheet("QLineEdit {border : 1px solid red}")
-                        self.ui.le_freq.setStyleSheet("QLineEdit {}")
-                    case 'FREQ':
-                        self.ui.le_freq.setStyleSheet("QLineEdit {border : 1px solid red}")
-                    case 'MODE':
-                        self.ui.cb_mode.setStyleSheet("QComboBox {border : 1px solid red}")
-                    case 'RST_SENT':
-                        self.ui.le_rst_sent.setStyleSheet("QLineEdit {border : 1px solid red}")
-                    case 'RST_RCVD':
-                        self.ui.le_rst_rcvd.setStyleSheet("QLineEdit {border : 1px solid red}")
-
+            # Reset Style Sheet on Input Fields
+            for field in all_possible_missing_fields.values():
+                field.setStyleSheet("")
+            # Set a Red Border on Missing Input Fields
+            for missing_field in missing_fields:
+                if missing_field in all_possible_missing_fields:
+                    all_possible_missing_fields[missing_field].setStyleSheet("border : 1px solid red")
 
     def clear_new_log_entry_form(self):
         self.update_qso = False
@@ -584,7 +574,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.dateEdit.setDate(QDate.fromString("20000101", "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString('000000', "HHmmss"))
 
-
     # Switch verbergen/anzeigen von Tabellenspalte
     def hide_and_seek(self):
         if self.ui.tableView.horizontalHeader().isSectionHidden(0):
@@ -594,18 +583,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             logging.debug("..alles muss versteckt sein..")
             self.ui.tableView.horizontalHeader().hideSection(0)
 
-
     def reset_form(self):
         self.clear_new_log_entry_form()
         self.ui.tableView.sortByColumn(-1, Qt.AscendingOrder)
-
 
     def load_file_to_table(self, filename):
         loaded_data = self.generic_load_file(filename)
         new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
         new_clean_full_qso_list = prune_qsos(new_full_qso_list)
         self.model.add_new_qsos_list(new_clean_full_qso_list)
-
 
     def generic_load_file(self, filename):
         logging.debug("Load table from {} ...".format(filename))
@@ -621,7 +607,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         return loaded_data
 
-
     def json_save_file_chooser(self):
         logging.debug("Open File Select for Save in JSON")
         filedialog = initial_file_dialog_config("json")
@@ -633,7 +618,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             generic_save_data_to_file(filename, self.model.get_data_from_table())
             self.set_do_we_have_unsaved_changes(False)
             return True
-
 
     def json_load_file_chooser(self):
         logging.debug("Open File Select for Load in JSON")
@@ -647,7 +631,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.load_file_to_table(filename)
             return filename
 
-
     def adif_save_file_chooser(self):
         logging.debug("Open File Select for Export in Adif")
         filedialog = initial_file_dialog_config("adi")
@@ -658,7 +641,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             logging.debug(f"ADIF File {filename} will be exported")
             generic_save_data_to_file(filename, self.model.get_data_from_table(), self.custom_fields_list)
             self.set_do_we_have_unsaved_changes(False)
-
 
     def adif_load_file_chooser(self):
         logging.debug("Open File Select for Import in Adif")
@@ -671,7 +653,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             logging.debug(f"ADIF File {filename} will be imported")
             self.load_file_to_table(filename)
 
-
     def get_table_row_data(self, index):
         self.clear_new_log_entry_form()
         # Get the Real Row bcs > Filtering and Sorting..
@@ -680,7 +661,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_qso = True
         self.row = new_row
         self.fill_values_to_edit_form(edit_QSO_dict)
-
 
     def save_or_edit_handler(self):
         # Called by SaveButton
@@ -695,7 +675,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             logging.info("Saving new Entry on row {}".format(self.row))
             self.save_new_log_entry()
-
 
     def fill_values_to_edit_form(self, edit_QSO_dict):
         self.ui.le_call.setText(edit_QSO_dict.get('CALL'))
@@ -737,7 +716,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_rcvd_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_RCVD') else False)
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
-
     def save_unsaved_changes(self):
         if self._do_we_have_unsaved_changes:
             reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
@@ -747,11 +725,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return True
 
-
     def closeEvent(self, event):
         if self.save_unsaved_changes():
             event.accept()
-        # Save to Remove these?!
+        # Save to Remove this else???
         #    else:
         #        event.ignore()
 
