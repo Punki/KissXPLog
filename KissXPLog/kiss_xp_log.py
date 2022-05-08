@@ -25,8 +25,14 @@ from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_
 from KissXPLog.table_model import TableModel
 
 
+# Fixme:
+# Not Saving is not Possible > BUG!
+# WIP:
+# red border on missing fields
+
+
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, load_user_settings=False, load_last_used_db=True):
         super().__init__()
         self.cdw = None
         self.ui = Ui_MainWindow()
@@ -67,7 +73,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Load Config File
         self.user_config = UserConfig()
-        self.load_user_settings()
+        if load_user_settings:
+            self.load_user_settings()
 
         self.model = TableModel(self.data, self.row_index)
         self.proxyModel = QSortFilterProxyModel()
@@ -114,7 +121,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.bt_column_filter.setMenu(currentQMenu)
 
         # DEV OpenLastUsedFile:
-        self.dev_open_last_used_db()
+        if load_last_used_db:
+            self.dev_open_last_used_db()
 
         # Start Autosave if Conditions are given:
         self.start_timed_autosave_thread()
@@ -196,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_open_file = QAction("Open File", self)
         self.dev_update_file = QAction("Update File", self)
         self.dev_save_config = QAction("Save Config", self)
-        self.dev_change_title =QAction("Change Title", self)
+        self.dev_change_title = QAction("Change Title", self)
 
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
@@ -251,20 +259,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if msg_box.clickedButton() == overrideWindowBtn:
             print("Override")
             self.close()
-            self.__init__()
-            self.reset_table_and_config_for_new_window()
+            self.__init__(load_last_used_db=False)
+            self.reset_config_for_new_window()
+            self.dev_set_new_window_title("Changed..")
         elif msg_box.clickedButton() == newWindowBtn:
             print("New Window")
-            self.__init__()
-            self.reset_table_and_config_for_new_window()
+            self.__init__(load_last_used_db=False)
+            self.reset_config_for_new_window()
+            self.dev_set_new_window_title("Changed..")
         elif msg_box.clickedButton() == cancelBtn:
             print("Cancel")
 
-    def reset_table_and_config_for_new_window(self):
+    def reset_config_for_new_window(self):
         # Reset Config for new Windows
         self.user_config.reset_fields_for_second_instance()
-        # Reset DB >> ToDo Cleaner Way than instantiate and remove afterwards..?!
-        self.model.add_new_qsos_list([])
 
     def dev_open_file_menu_triggered(self):
         if self.save_unsaved_changes():
@@ -298,10 +306,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.user_config.save_user_settings_to_file()
 
     def dev_set_new_window_title(self, title):
-        if title:
-            self.setWindowTitle(title)
-        else:
-            self.setWindowTitle("Title changed..")
+        self.setWindowTitle(title)
 
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
@@ -421,7 +426,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def auto_enter_dxcc_infos_from_callsign(self, all_dxcc):
         # Improvement for better User experience
-        if len(all_dxcc) > 0:
+        if all_dxcc and len(all_dxcc) > 0:
             if all_dxcc['Country']:
                 if not self.ui.le_country.text():
                     self.ui.le_country.setText(all_dxcc['Country'])
@@ -520,13 +525,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def save_new_log_entry(self):
         new_qso = self.get_dict_from_inputform()
         new_qso = remove_empty_fields(new_qso)
-        if are_minimum_qso_data_present(new_qso):
+        missing_fields = are_minimum_qso_data_present(new_qso)
+        if not missing_fields:
             self.clear_new_log_entry_form()
             self.model.add_new_qso_method_two(new_qso)
             # self.model.add_new_qso_method_one(new_qso)
         else:
             # Todo Show Hint which fields needs to edit for a minimal qso.. (ggf roter Rahmen über felder oä)
+            # check which element is missing and mark in gui >
+            print(f"Missing: {missing_fields}")
             show_error_message("No Valid QSO", "Please fill in all the required fields.")
+
+            possible_missing=[self.ui.le_call,self.ui.le_freq,self.ui.cb_mode,self.ui.le_rst_sent,self.ui.le_rst_rcvd]
+
+            for value in missing_fields:
+                match value:
+                    case 'CALL':
+                        self.ui.le_call.setStyleSheet("QLineEdit {border : 1px solid red}")
+                        self.ui.le_freq.setStyleSheet("QLineEdit {}")
+                    case 'FREQ':
+                        self.ui.le_freq.setStyleSheet("QLineEdit {border : 1px solid red}")
+                    case 'MODE':
+                        self.ui.cb_mode.setStyleSheet("QComboBox {border : 1px solid red}")
+                    case 'RST_SENT':
+                        self.ui.le_rst_sent.setStyleSheet("QLineEdit {border : 1px solid red}")
+                    case 'RST_RCVD':
+                        self.ui.le_rst_rcvd.setStyleSheet("QLineEdit {border : 1px solid red}")
+
 
     def clear_new_log_entry_form(self):
         self.update_qso = False
@@ -559,6 +584,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.dateEdit.setDate(QDate.fromString("20000101", "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString('000000', "HHmmss"))
 
+
     # Switch verbergen/anzeigen von Tabellenspalte
     def hide_and_seek(self):
         if self.ui.tableView.horizontalHeader().isSectionHidden(0):
@@ -568,15 +594,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             logging.debug("..alles muss versteckt sein..")
             self.ui.tableView.horizontalHeader().hideSection(0)
 
+
     def reset_form(self):
         self.clear_new_log_entry_form()
         self.ui.tableView.sortByColumn(-1, Qt.AscendingOrder)
+
 
     def load_file_to_table(self, filename):
         loaded_data = self.generic_load_file(filename)
         new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
         new_clean_full_qso_list = prune_qsos(new_full_qso_list)
         self.model.add_new_qsos_list(new_clean_full_qso_list)
+
 
     def generic_load_file(self, filename):
         logging.debug("Load table from {} ...".format(filename))
@@ -592,6 +621,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         return loaded_data
 
+
     def json_save_file_chooser(self):
         logging.debug("Open File Select for Save in JSON")
         filedialog = initial_file_dialog_config("json")
@@ -603,6 +633,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             generic_save_data_to_file(filename, self.model.get_data_from_table())
             self.set_do_we_have_unsaved_changes(False)
             return True
+
 
     def json_load_file_chooser(self):
         logging.debug("Open File Select for Load in JSON")
@@ -616,6 +647,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.load_file_to_table(filename)
             return filename
 
+
     def adif_save_file_chooser(self):
         logging.debug("Open File Select for Export in Adif")
         filedialog = initial_file_dialog_config("adi")
@@ -626,6 +658,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             logging.debug(f"ADIF File {filename} will be exported")
             generic_save_data_to_file(filename, self.model.get_data_from_table(), self.custom_fields_list)
             self.set_do_we_have_unsaved_changes(False)
+
 
     def adif_load_file_chooser(self):
         logging.debug("Open File Select for Import in Adif")
@@ -638,6 +671,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             logging.debug(f"ADIF File {filename} will be imported")
             self.load_file_to_table(filename)
 
+
     def get_table_row_data(self, index):
         self.clear_new_log_entry_form()
         # Get the Real Row bcs > Filtering and Sorting..
@@ -646,6 +680,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_qso = True
         self.row = new_row
         self.fill_values_to_edit_form(edit_QSO_dict)
+
 
     def save_or_edit_handler(self):
         # Called by SaveButton
@@ -660,6 +695,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             logging.info("Saving new Entry on row {}".format(self.row))
             self.save_new_log_entry()
+
 
     def fill_values_to_edit_form(self, edit_QSO_dict):
         self.ui.le_call.setText(edit_QSO_dict.get('CALL'))
@@ -701,6 +737,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_rcvd_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_RCVD') else False)
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
+
     def save_unsaved_changes(self):
         if self._do_we_have_unsaved_changes:
             reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
@@ -710,11 +747,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return True
 
+
     def closeEvent(self, event):
         if self.save_unsaved_changes():
             event.accept()
-        else:
-            event.ignore()
+        # Save to Remove these?!
+        #    else:
+        #        event.ignore()
 
         # self.stop_timed_autosave_thread()
         print("Im Done with this...")

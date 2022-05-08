@@ -10,7 +10,7 @@ class TestJsonFileHandling(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
 
     def test_input_values_converted_korrekt(self):
         input_data = {'CALL': 'TESTTESTTEST', 'QSO_DATE': '20201119', 'TIME_ON': '155300',

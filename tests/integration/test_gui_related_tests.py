@@ -9,7 +9,7 @@ class TestGuiStuff(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
 
     def test_lowcase_unit_match_band(self):
         band_low_case = {"BAND": "80m"}
@@ -28,7 +28,7 @@ class TestSetFrequencyFromBand(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
         self.window.ui.cb_band.setCurrentText("80m")
 
     def test_freq_not_set(self):
@@ -47,7 +47,7 @@ class TestSetBandFromFrequency(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
         self.window.ui.le_freq.setText("3.5")
 
     def test_band_not_set(self):
@@ -67,7 +67,7 @@ class TestAutoEnterDxccInfosFromCallsign(TestCase):
 
     # FixMe check for Key Errors!
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
         self.all_dxcc['Country'] = "AAAAAA"
         self.all_dxcc['Continent'] = "BBBBBB"
         self.all_dxcc['ITUZone'] = "CC"

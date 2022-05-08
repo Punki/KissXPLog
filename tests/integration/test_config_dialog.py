@@ -9,7 +9,7 @@ class TestShowUserSettingsInConfigDialog(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
         self.window.show_config_window()
 
     def test_station_callsign(self):

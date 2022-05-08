@@ -16,7 +16,7 @@ class TestJsonFileHandling(unittest.TestCase):
     app = QtWidgets.QApplication(sys.argv)
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False, load_last_used_db=False)
         self.json_outputfile_name = "testfile.json"
         self.json_outputfile_name2 = "testfile2.json"
         self.adif_outputfile_name = "testfile.adi"
