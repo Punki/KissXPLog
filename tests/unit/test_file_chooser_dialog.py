@@ -26,7 +26,7 @@ class FileChooserTests(TestCase):
         QtCore.QTimer.singleShot(1, lambda: keyboard.write(filename))
         QtCore.QTimer.singleShot(10, lambda: keyboard.press('enter'))
 
-        window = MainWindow()
+        window = MainWindow(load_user_settings=False)
         gsfc = KissXPLog.kiss_xp_log.generic_save_data_to_file = MagicMock()
         window.json_save_file_chooser()
 
@@ -44,7 +44,7 @@ class FileChooserTests(TestCase):
         QtCore.QTimer.singleShot(1, lambda: keyboard.write(filename))
         QtCore.QTimer.singleShot(10, lambda: keyboard.press('enter'))
 
-        window = MainWindow()
+        window = MainWindow(load_user_settings=False)
         gsfc = KissXPLog.kiss_xp_log.generic_save_data_to_file = MagicMock()
         window.adif_save_file_chooser()
 

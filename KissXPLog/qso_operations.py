@@ -24,12 +24,14 @@ def add_new_information_to_qso_list(old_qsos, new_qsos):
 
 
 def are_minimum_qso_data_present(qso_to_check):
+    missing_fields=[]
     minimal_qso_keys = ["CALL", "QSO_DATE", "TIME_ON", "FREQ", "MODE", "RST_SENT", "RST_RCVD"]
     # Sicherstellen alle benötigten Keys vorhanden sind und Values nicht None oder '' sind.
     for k in minimal_qso_keys:
         if not qso_to_check.get(k):
-            return False
-    return True
+            #Todo List mit missing values
+            missing_fields.append(k)
+    return missing_fields
 
 
 def remove_duplicates_in_new_qsos(old_qso_dict_list, new_qso_dict_list):
