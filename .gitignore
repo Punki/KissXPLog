@@ -4,7 +4,6 @@
 **/core
 *.pyo
 *.bak
-
 /KissXPLog/data/*
 /build/*
 /dist/*
