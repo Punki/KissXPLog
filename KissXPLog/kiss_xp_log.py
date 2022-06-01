@@ -8,7 +8,7 @@ from time import sleep
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
-from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox, QLineEdit
+from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
 from KissXPLog import UserConfig, config
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
@@ -24,9 +24,6 @@ from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_
     prune_qsos
 from KissXPLog.table_model import TableModel
 
-
-# Fixme:
-# Not Saving is not Possible > BUG!
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, load_user_settings=False, load_last_used_db=True):
@@ -717,20 +714,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
     def save_unsaved_changes(self):
+        close_window = True
         if self._do_we_have_unsaved_changes:
             reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
-                return self.json_save_file_chooser()
-        else:
-            return True
+                close_window = self.json_save_file_chooser()
+        return close_window
 
     def closeEvent(self, event):
         if self.save_unsaved_changes():
             event.accept()
-        # Save to Remove this else???
-        #    else:
-        #        event.ignore()
+        else:
+            event.ignore()
 
         # self.stop_timed_autosave_thread()
         print("Im Done with this...")
