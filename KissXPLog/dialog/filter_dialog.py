@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QDialogButtonBox, QListView, QFormLayout, QLabel, QDialog, QCheckBox
+from PyQt5.QtWidgets import QDialogButtonBox, QListView, QFormLayout, QLabel, QDialog, QCheckBox, QAbstractItemView
 
 
 class FilterDialog(QDialog):
@@ -12,6 +12,7 @@ class FilterDialog(QDialog):
         self.cb_select_all.clicked.connect(self.de_select_all)
         form.addRow(self.cb_select_all)
         self.listView = QListView(self)
+        self.listView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         form.addRow(self.listView)
         model = QStandardItemModel(self.listView)
         self.setWindowTitle(title)

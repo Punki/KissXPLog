@@ -9,7 +9,7 @@ class TestGuiStuff(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
 
     def test_lowcase_unit_match_band(self):
         band_low_case = {"BAND": "80m"}
@@ -28,7 +28,7 @@ class TestSetFrequencyFromBand(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
         self.window.ui.cb_band.setCurrentText("80m")
 
     def test_freq_not_set(self):
@@ -47,7 +47,7 @@ class TestSetBandFromFrequency(TestCase):
     app = QApplication([])
 
     def setUp(self):
-        self.window = MainWindow()
+        self.window = MainWindow(load_user_settings=False)
         self.window.ui.le_freq.setText("3.5")
 
     def test_band_not_set(self):
@@ -63,54 +63,55 @@ class TestSetBandFromFrequency(TestCase):
 
 class TestAutoEnterDxccInfosFromCallsign(TestCase):
     app = QApplication([])
+    all_dxcc = {}
 
     # FixMe check for Key Errors!
     def setUp(self):
-        self.window = MainWindow()
-        self.window.all_dxcc['Country'] = "AAAAAA"
-        self.window.all_dxcc['Continent'] = "BBBBBB"
-        self.window.all_dxcc['ITUZone'] = "CC"
-        self.window.all_dxcc['CQZone'] = "DD"
+        self.window = MainWindow(load_user_settings=False)
+        self.all_dxcc['Country'] = "AAAAAA"
+        self.all_dxcc['Continent'] = "BBBBBB"
+        self.all_dxcc['ITUZone'] = "CC"
+        self.all_dxcc['CQZone'] = "DD"
 
     def test_country_not_set(self):
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("AAAAAA", self.window.ui.le_country.text())
 
     def test_country_set_in_gui(self):
         self.window.ui.le_country.setText("ZZZ")
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("ZZZ", self.window.ui.le_country.text())
 
     def test_continent_not_set(self):
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("BBBBBB", self.window.ui.le_continent.text())
 
     def test_continent_set_in_gui(self):
         self.window.ui.le_continent.setText("YYY")
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("YYY", self.window.ui.le_continent.text())
 
     def test_ituzone_not_set(self):
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("CC", self.window.ui.le_itu.text())
 
     def test_ituzone_set_in_gui(self):
         self.window.ui.le_itu.setText("XXX")
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("XXX", self.window.ui.le_itu.text())
 
     def test_cqzone_not_set(self):
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("DD", self.window.ui.le_cq.text())
 
     def test_cqzone_set_in_gui(self):
         self.window.ui.le_cq.setText("WW")
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("WW", self.window.ui.le_cq.text())
 
     def test_none_values(self):
-        self.window.all_dxcc = {}
-        self.window.auto_enter_dxcc_infos_from_callsign()
+        self.all_dxcc = {}
+        self.window.auto_enter_dxcc_infos_from_callsign(self.all_dxcc)
         self.assertEqual("", self.window.ui.le_country.text())
         self.assertEqual("", self.window.ui.le_continent.text())
         self.assertEqual("", self.window.ui.le_itu.text())
