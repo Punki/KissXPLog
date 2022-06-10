@@ -15,7 +15,6 @@ def update_plist(plist_path: str):
     with open(plist_path, 'wb') as pf:
         pf.write(r.content)
     logging.debug(f"Updated CTY.plist..")
-    return None
 
 
 def get_plist():
@@ -44,4 +43,3 @@ def get_dxcc_from_callsign(callsign: str):
             logging.debug("Found Match")
             return dxcc.get(element)
     logging.debug(f"No DXCC Data found to {callsign}")
-    return None

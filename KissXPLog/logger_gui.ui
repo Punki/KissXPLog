@@ -307,13 +307,13 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>170</width>
             <height>22</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>500</width>
+            <width>200</width>
             <height>22</height>
            </size>
           </property>
@@ -323,13 +323,13 @@
          <widget class="QTextEdit" name="te_notes">
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>170</width>
             <height>100</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>500</width>
+            <width>200</width>
             <height>100</height>
            </size>
           </property>
@@ -458,6 +458,9 @@
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -1010,29 +1013,6 @@
            <string>Card</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="4">
-            <widget class="QComboBox" name="cbo_rcvd_options">
-             <property name="minimumSize">
-              <size>
-               <width>80</width>
-               <height>22</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>80</width>
-               <height>22</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QLabel" name="lb_qsl_rcvd">
-             <property name="text">
-              <string>Rcvd:</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="lb_qsl_sent">
              <property name="text">
@@ -1040,19 +1020,10 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="cbo_sent_options">
-             <property name="minimumSize">
-              <size>
-               <width>80</width>
-               <height>22</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>80</width>
-               <height>22</height>
-              </size>
+           <item row="0" column="3">
+            <widget class="QLabel" name="lb_qsl_rcvd">
+             <property name="text">
+              <string>Rcvd:</string>
              </property>
             </widget>
            </item>
@@ -1068,6 +1039,54 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="0" column="4">
+            <widget class="QComboBox" name="cbo_rcvd_options">
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>90</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="cbo_sent_options">
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>90</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDateEdit" name="de_qsl_sent_date">
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>90</width>
+               <height>22</height>
+              </size>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1193,7 +1212,7 @@
      <x>0</x>
      <y>0</y>
      <width>726</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

@@ -5,7 +5,7 @@ import os
 work_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = os.path.join(work_dir, "data")
 config_file = os.path.join(data_dir, "config.json")
-plist_path = os.path.join(data_dir, 'dxcc.plist')
+plist_path = os.path.join(data_dir, 'cty.plist')
 
 
 class UserConfig:
@@ -25,6 +25,12 @@ class UserConfig:
             self.user_settings['STATION_CALLSIGN'] = None
             self.user_settings['MY_CQ_ZONE'] = None
             self.user_settings['MY_ITU_ZONE'] = None
+            self.user_settings['Last_Used_DB'] = None
+
+    def reset_fields_for_second_instance(self):
+        self.user_settings['Last_Used_DB'] = None
+        self.user_settings['Autosave'] = False
+        self.user_settings['AutosaveIntervall'] = 10
 
     def save_user_settings_to_file(self):
         with open(config_file, "w") as open_file:

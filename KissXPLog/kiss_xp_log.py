@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog import UserConfig
+from KissXPLog import UserConfig, config
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
     frequency_to_band
 from KissXPLog.const_adif_fields import QSL_RCVD_ENUMERATION, QSL_SENT_ENUMERATION, MODES_WITH_SUBMODE, \
@@ -19,14 +19,14 @@ from KissXPLog.dialog.config_dialog import ConfigDialog
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
-from KissXPLog.qrz_lookup import get_dxcc_from_callsign
+from KissXPLog.qrz_lookup import get_dxcc_from_callsign, update_plist
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
     prune_qsos
 from KissXPLog.table_model import TableModel
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, load_user_settings=False, load_last_used_db=True):
         super().__init__()
         self.cdw = None
         self.ui = Ui_MainWindow()
@@ -56,8 +56,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.all_dxcc = {}
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
-                          'DXCC', 'COUNTRY', 'STATE', 'QSL_SENT', 'QSL_RCVD', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD',
-                          'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME', 'NOTES']
+                          'DXCC', 'COUNTRY', 'STATE', 'Continent', 'ITUZone', 'CQZone', 'QSL_SENT', 'QSL_RCVD',
+                          'QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME',
+                          'NOTES']
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
 
@@ -66,7 +67,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Load Config File
         self.user_config = UserConfig()
-        self.load_user_settings()
+        if load_user_settings:
+            self.load_user_settings()
 
         self.model = TableModel(self.data, self.row_index)
         self.proxyModel = QSortFilterProxyModel()
@@ -99,6 +101,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.dateEdit.setMaximumDate(QDate.currentDate())
         self.ui.dateEdit.setCalendarPopup(True)
 
+        # self.ui.de_qsl_sent_date.setDate(QDate.currentDate())
+        self.ui.de_qsl_sent_date.setDisabled(True)
+
         # Filtern der Spalten mit Button
         currentQMenu = QMenu()
         for column in range(self.model.columnCount()):
@@ -108,6 +113,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             currentQAction.toggled.connect(partial(self.setColumnVisible, column))
             currentQMenu.addAction(currentQAction)
         self.ui.bt_column_filter.setMenu(currentQMenu)
+
+        # DEV OpenLastUsedFile:
+        if load_last_used_db:
+            self.dev_open_last_used_db()
 
         # Start Autosave if Conditions are given:
         self.start_timed_autosave_thread()
@@ -124,6 +133,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.newAction = QAction("&New", self)
         self.discardAction = QAction("&Discard", self)
         self.editTableAction = QAction("&Edit Table", self)
+        self.getNewPlistAction = QAction("&Update Plist")
 
     def _createMenuBar(self):
         menuBar = self.menuBar()
@@ -140,12 +150,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editMenu.addAction(self.newAction)
         editMenu.addAction(self.discardAction)
         editMenu.addAction(self.editTableAction)
-
-    def _createFullDevMenu(self):
-        self.new_dev_menu_method = QAction("Simple Thread", self)
-        devMenu = self.menuBar().addMenu("&DEV")
-        devMenu.addAction(self.new_dev_menu_method)
-        # self.new_dev_menu_method.triggered.connect(get_new_plist)
+        editMenu.addAction(self.getNewPlistAction)
 
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
@@ -157,11 +162,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_mode.currentIndexChanged.connect(self.set_default_rst)
         # Call should always be Uppercase
         self.ui.le_call.textChanged.connect(lambda: self.ui.le_call.setText(self.ui.le_call.text().upper()))
-        #Enable Cantons if Country is Swiss
+        # Enable Cantons if Country is Swiss
         self.ui.le_country.textChanged.connect(self.enable_canton_if_swiss)
-
         # Fill the Submodes from Mode select
         self.ui.cb_mode.currentIndexChanged.connect(self.fill_in_sub_modes)
+        # Activate and set Sent Date to today if Card is Send
+        self.ui.cbo_sent_options.currentIndexChanged.connect(self.activate_and_set_Date_if_sent)
 
         # Connect File actions
         self.configAction.triggered.connect(self.show_config_window)
@@ -174,22 +180,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.newAction.triggered.connect(self.clear_new_log_entry_form)
         self.discardAction.triggered.connect(self.reset_form)
         self.editTableAction.triggered.connect(self.edit_qso_table_switch)
+        self.getNewPlistAction.triggered.connect(lambda: update_plist(config.plist_path))
         # Connect Help actions
         # self.helpContentAction.triggered.connect(self.helpContent)
         # self.aboutAction.triggered.connect(self.about)
+
+    # New > Schliesse bisherige Table >> Save ja/nein, erstelle empty DB.
+    # Open > Schliesse bisherige Table >> Save ja/nein, öffne neue DB.
+    # Update > Füge Neue Daten zu bestehender DB hinzu.
 
     def _createFullDevMenu(self):
         self.new_dev_menu_method = QAction("Simple Thread", self)
         # self.devTimePrintAction = QAction("&Print with Timer", self)
         # self.devAutosaveAction = QAction("&Enable Autosave", self)
+        self.dev_fill_up_fields_menu_method = QAction("AutoFill Fields", self)
+        self.dev_new_file = QAction("New File", self)
+        self.dev_open_file = QAction("Open File", self)
+        self.dev_update_file = QAction("Update File", self)
+        self.dev_save_config = QAction("Save Config", self)
+        self.dev_change_title = QAction("Change Title", self)
+
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
+        devMenu.addAction(self.dev_fill_up_fields_menu_method)
+        devMenu.addAction(self.dev_new_file)
+        devMenu.addAction(self.dev_open_file)
+        devMenu.addAction(self.dev_update_file)
+        devMenu.addAction(self.dev_save_config)
+        devMenu.addAction(self.dev_change_title)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
+        self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
+        self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
+        self.dev_open_file.triggered.connect(self.dev_open_file_menu_triggered)
+        self.dev_update_file.triggered.connect(self.dev_update_opened_file_with_stuff)
+        self.dev_save_config.triggered.connect(self.dev_save_config_to_file)
+        self.dev_change_title.triggered.connect(self.dev_set_new_window_title)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
-
 
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)
@@ -204,17 +233,81 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         sleep(10)
         print("after Sleep..")
 
+    def dev_fill_all_fields(self):
+        # Just minimal infos for a valid Qso, dev only.
+        self.ui.le_call.setText("HB9")
+        self.new_dxcc_lookup_thread()
+        self.ui.cb_mode.setCurrentIndex(self.ui.cb_mode.findText("CW"))
+        self.ui.cb_band.setCurrentIndex(self.ui.cb_band.findText("80m"))
+        self.ui.cbo_sent_options.setCurrentIndex(self.ui.cbo_sent_options.findText("Yes"))
+
+    def dev_new_menu_triggered(self):
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setWindowTitle("Open in new Window?")
+        msg_box.setText("Open in this Window or New Window?")
+        overrideWindowBtn = msg_box.addButton('Use This Window..', QMessageBox.NoRole)
+        newWindowBtn = msg_box.addButton('Open New One', QMessageBox.NoRole)
+        cancelBtn = msg_box.addButton('Cancel', QMessageBox.RejectRole)
+        msg_box.exec_()
+        if msg_box.clickedButton() == overrideWindowBtn:
+            print("Override")
+            self.close()
+            self.__init__(load_last_used_db=False)
+            self.reset_config_for_new_window()
+            self.dev_set_new_window_title("Changed..")
+        elif msg_box.clickedButton() == newWindowBtn:
+            print("New Window")
+            self.__init__(load_last_used_db=False)
+            self.reset_config_for_new_window()
+            self.dev_set_new_window_title("Changed..")
+        elif msg_box.clickedButton() == cancelBtn:
+            print("Cancel")
+
+    def reset_config_for_new_window(self):
+        # Reset Config for new Windows
+        self.user_config.reset_fields_for_second_instance()
+
+    def dev_open_file_menu_triggered(self):
+        if self.save_unsaved_changes():
+            self.model.add_new_qsos_list([])
+            if filepath := self.json_load_file_chooser():
+                self.user_config.user_settings['Last_Used_DB'] = filepath
+                logging.debug(f"Set Last used DB to: {filepath}")
+                self.dev_set_new_window_title(f"File: {filepath}")
+
+    def dev_update_opened_file_with_stuff(self):
+        self.dev_load_file_chooser()
+
+    def dev_load_file_chooser(self):
+        logging.debug("Open DEV File Select for Load")
+        filedialog = initial_file_dialog_config("adi_json")
+        filedialog.setWindowTitle('Choose file to open')
+        filedialog.setFileMode(QFileDialog.ExistingFile)
+        filedialog.setAcceptMode(QFileDialog.AcceptOpen)
+        if filedialog.exec_():
+            filename = filedialog.selectedFiles()[0]
+            logging.debug(f"File {filename} will be loaded")
+            self.load_file_to_table(filename)
+
+    def dev_open_last_used_db(self):
+        if db_path := self.user_config.user_settings.get('Last_Used_DB'):
+            self.dev_set_new_window_title(f"File: {db_path}")
+            full_qso_db = self.generic_load_file(db_path)
+            self.model.add_new_qsos_list(full_qso_db)
+
+    def dev_save_config_to_file(self):
+        self.user_config.save_user_settings_to_file()
+
+    def dev_set_new_window_title(self, title):
+        self.setWindowTitle(title)
+
     def set_do_we_have_unsaved_changes(self, do_we_have_unsaved_changes):
         # Todo clean Observer
         self._do_we_have_unsaved_changes = do_we_have_unsaved_changes
         if self.autosave:
             if self.autosave_interval == 0:
                 self.autosave_to_file()
-
-    def new_thread_methoden_test(self):
-        t = threading.Thread(target=self.print_something_useful, daemon=True)
-        print(f"Threads activ: {threading.enumerate()}")
-        t.start()
 
     def load_user_settings(self):
         logging.info(f"Loaded User Config.")
@@ -267,6 +360,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         threading.Timer(wait_in_sec, lambda: self.auto_timer_dev(wait_in_sec)).start()
         self.print_something_useful()
 
+    def activate_and_set_Date_if_sent(self):
+        if self.ui.cbo_sent_options.currentText() == 'Yes':
+            self.ui.de_qsl_sent_date.setDisabled(False)
+            # Only set Current Date if not already set..
+            if self.ui.de_qsl_sent_date.date().toString("yyyyMMdd") == "20000101":
+                self.ui.de_qsl_sent_date.setDate(QDate.currentDate())
+        else:
+            self.ui.de_qsl_sent_date.setDisabled(True)
+            self.ui.de_qsl_sent_date.setDate(QDate.fromString("20000101", "yyyyMMdd"))
+
     def enable_canton_if_swiss(self):
         if self.ui.le_country.text() == 'Switzerland':
             self.ui.cb_canton.setDisabled(False)
@@ -301,13 +404,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def dxcc_lookup(self, callsign):
         try:
-            self.all_dxcc = get_dxcc_from_callsign(callsign)
+            all_dxcc = get_dxcc_from_callsign(callsign)
         except TypeError:
             show_error_message("No QRZ-info found",
                                f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
             return
         self.set_time_after_callsign_enter()
-        self.auto_enter_dxcc_infos_from_callsign()
+        self.auto_enter_dxcc_infos_from_callsign(all_dxcc)
 
     def set_time_after_callsign_enter(self):
         # if time not changed, set to now:
@@ -315,21 +418,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.ui.dateEdit.date().toString("yyyyMMdd") == '20000101':
                 self.set_gui_date_and_time_to_now()
 
-    def auto_enter_dxcc_infos_from_callsign(self):
+    def auto_enter_dxcc_infos_from_callsign(self, all_dxcc):
         # Improvement for better User experience
-        if len(self.all_dxcc) > 0:
-            if self.all_dxcc['Country']:
+        if all_dxcc and len(all_dxcc) > 0:
+            if all_dxcc['Country']:
                 if not self.ui.le_country.text():
-                    self.ui.le_country.setText(self.all_dxcc['Country'])
-            if self.all_dxcc['Continent']:
+                    self.ui.le_country.setText(all_dxcc['Country'])
+            if all_dxcc['Continent']:
                 if not self.ui.le_continent.text():
-                    self.ui.le_continent.setText(self.all_dxcc['Continent'])
-            if self.all_dxcc['ITUZone']:
+                    self.ui.le_continent.setText(all_dxcc['Continent'])
+            if all_dxcc['ITUZone']:
                 if not self.ui.le_itu.text():
-                    self.ui.le_itu.setText(str(self.all_dxcc['ITUZone']))
-            if self.all_dxcc['CQZone']:
+                    self.ui.le_itu.setText(str(all_dxcc['ITUZone']))
+            if all_dxcc['CQZone']:
                 if not self.ui.le_cq.text():
-                    self.ui.le_cq.setText(str(self.all_dxcc['CQZone']))
+                    self.ui.le_cq.setText(str(all_dxcc['CQZone']))
 
     def set_frequency_from_band(self):
         # check if freq is empty!
@@ -395,6 +498,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                    'QSL_RCVD': QSL_RCVD_ENUMERATION.get(self.ui.cbo_rcvd_options.currentText())[0],
                    'QSL_SENT': QSL_SENT_ENUMERATION.get(self.ui.cbo_sent_options.currentText())[0],
+                   'QSLSDATE': (
+                       self.ui.de_qsl_sent_date.date().toString(
+                           "yyyyMMdd") if self.ui.de_qsl_sent_date.isEnabled() else ''),
 
                    'EQSL_QSL_RCVD': True if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
                    'EQSL_QSL_SENT': True if self.ui.cb_eqsl_sent_new.isChecked() else '',
@@ -403,20 +509,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    'LOTW_QSL_SENT': True if self.ui.cb_lotw_sent_new.isChecked() else '',
 
                    'COUNTRY': self.ui.le_country.text(),
-                   'STATE': self.ui.cb_canton.currentText()
+                   'STATE': self.ui.cb_canton.currentText(),
+                   'Continent': self.ui.le_continent.text(),
+                   'ITUZone': self.ui.le_itu.text(),
+                   'CQZone': self.ui.le_cq.text()
                    }
         return new_qso
 
     def save_new_log_entry(self):
         new_qso = self.get_dict_from_inputform()
         new_qso = remove_empty_fields(new_qso)
-        if are_minimum_qso_data_present(new_qso):
+        missing_fields = are_minimum_qso_data_present(new_qso)
+        if not missing_fields:
             self.clear_new_log_entry_form()
             self.model.add_new_qso_method_two(new_qso)
             # self.model.add_new_qso_method_one(new_qso)
         else:
-            # Todo Show Hint which fields needs to edit for a minimal qso.. (ggf roter Rahmen über felder oä)
             show_error_message("No Valid QSO", "Please fill in all the required fields.")
+            all_possible_missing_fields = {'CALL': self.ui.le_call,
+                                           'FREQ': self.ui.le_freq,
+                                           'MODE': self.ui.cb_mode,
+                                           'RST_SENT': self.ui.le_rst_sent,
+                                           'RST_RCVD': self.ui.le_rst_rcvd}
+
+            # Reset Style Sheet on Input Fields
+            for field in all_possible_missing_fields.values():
+                field.setStyleSheet("")
+            # Set a Red Border on Missing Input Fields
+            for missing_field in missing_fields:
+                if missing_field in all_possible_missing_fields:
+                    all_possible_missing_fields[missing_field].setStyleSheet("border : 1px solid red")
 
     def clear_new_log_entry_form(self):
         self.update_qso = False
@@ -438,6 +560,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.ui.cbo_rcvd_options.setCurrentIndex(0)
         self.ui.cbo_sent_options.setCurrentIndex(0)
+        self.ui.de_qsl_sent_date.setDate(QDate.fromString("20000101", "yyyyMMdd"))
 
         self.ui.cb_eqsl_rcvd_new.setChecked(False)
         self.ui.cb_eqsl_sent_new.setChecked(False)
@@ -461,11 +584,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.clear_new_log_entry_form()
         self.ui.tableView.sortByColumn(-1, Qt.AscendingOrder)
 
-    def generic_load_file_to_table(self, filename):
+    def load_file_to_table(self, filename):
+        loaded_data = self.generic_load_file(filename)
+        new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
+        new_clean_full_qso_list = prune_qsos(new_full_qso_list)
+        self.model.add_new_qsos_list(new_clean_full_qso_list)
+
+    def generic_load_file(self, filename):
         logging.debug("Load table from {} ...".format(filename))
         # file_extension = str(filename).strip().split(".", 1)[1]
         file_extension = str(filename).strip()
-        file_extension = re.search('\w*$', file_extension).group(0)
+        file_extension = re.search(r'\w*$', file_extension).group(0)
         if file_extension == "json":
             loaded_data = read_data_from_json_file(filename)
         elif file_extension == "adif" or file_extension == "adi":
@@ -473,9 +602,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             show_error_message("Error", f"Data Type is not supported: {file_extension}")
             return
-        new_full_qso_list = add_new_information_to_qso_list(self.model.get_data_from_table(), loaded_data)
-        new_clean_full_qso_list = prune_qsos(new_full_qso_list)
-        self.model.add_new_qsos_list(new_clean_full_qso_list)
+        return loaded_data
 
     def json_save_file_chooser(self):
         logging.debug("Open File Select for Save in JSON")
@@ -486,6 +613,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File will be saved to {filename}")
             generic_save_data_to_file(filename, self.model.get_data_from_table())
+            self.set_do_we_have_unsaved_changes(False)
             return True
 
     def json_load_file_chooser(self):
@@ -497,7 +625,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File {filename} will be loaded")
-            self.generic_load_file_to_table(filename)
+            self.load_file_to_table(filename)
+            return filename
 
     def adif_save_file_chooser(self):
         logging.debug("Open File Select for Export in Adif")
@@ -519,7 +648,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"ADIF File {filename} will be imported")
-            self.generic_load_file_to_table(filename)
+            self.load_file_to_table(filename)
 
     def get_table_row_data(self, index):
         self.clear_new_log_entry_form()
@@ -532,7 +661,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def save_or_edit_handler(self):
         # Called by SaveButton
-        self.set_do_we_have_unsaved_changes(False)
+        self.set_do_we_have_unsaved_changes(True)
         if self.update_qso:
             self.update_qso = False
             updated_qso = self.get_dict_from_inputform()
@@ -557,13 +686,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.le_name.setText(edit_QSO_dict.get('NAME'))
         self.ui.te_notes.setText(edit_QSO_dict.get('NOTES'))
         self.ui.le_comment.setText(edit_QSO_dict.get('COMMENT'))
+        self.ui.de_qsl_sent_date.setDate(QDate.fromString(edit_QSO_dict.get('QSLSDATE'), "yyyyMMdd"))
+
         self.ui.le_country.setText(edit_QSO_dict.get('COUNTRY'))
         if self.ui.le_country.text() == 'Switzerland':
             self.ui.cb_canton.setCurrentText(edit_QSO_dict.get('STATE'))
+        self.ui.le_continent.setText(edit_QSO_dict.get('Continent'))
+        self.ui.le_itu.setText(edit_QSO_dict.get('ITUZone'))
+        self.ui.le_cq.setText(edit_QSO_dict.get('CQZone'))
 
         # QSL_RCVD = Key:'Y' >> Value:'YES'
         # Mappin from 'Y' to 'YES'
-        #
         for key, value in QSL_RCVD_ENUMERATION.items():
             if value[0] == edit_QSO_dict.get('QSL_RCVD'):
                 self.ui.cbo_rcvd_options.setCurrentText(key)
@@ -580,15 +713,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_rcvd_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_RCVD') else False)
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
-    def closeEvent(self, event):
+    def save_unsaved_changes(self):
+        close_window = True
         if self._do_we_have_unsaved_changes:
             reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
-                if self.json_save_file_chooser():
-                    event.accept()
-                else:
-                    event.ignore()
+                close_window = self.json_save_file_chooser()
+        return close_window
+
+    def closeEvent(self, event):
+        if self.save_unsaved_changes():
+            event.accept()
+        else:
+            event.ignore()
 
         # self.stop_timed_autosave_thread()
         print("Im Done with this...")

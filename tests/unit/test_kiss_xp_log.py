@@ -71,22 +71,26 @@ class MinimalQSODataPresent(TestCase):
     # {"CALL": "AAA", "QSO_DATE": "20200117", "TIME_ON": "182500", "FREQ": "7.012345", "MODE": "FT8", "RST_SENT": "-15","RST_RCVD": "-15"}
     def test_all_fields_no_data(self):
         empty_qso = {"CALL": "", "QSO_DATE": "", "TIME_ON": "", "FREQ": "", "MODE": "", "RST_SENT": "", "RST_RCVD": ""}
-        self.assertFalse(are_minimum_qso_data_present(empty_qso))
+        expected = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'MODE', 'RST_SENT', 'RST_RCVD']
+        self.assertListEqual(expected, are_minimum_qso_data_present(empty_qso))
 
     def test_just_some_fields_all_data(self):
         fields_missing = {"CALL": "AAA", "QSO_DATE": "20200117", "TIME_ON": "182500", "MODE": "FT8", "RST_SENT": "-15"}
-        self.assertFalse(are_minimum_qso_data_present(fields_missing))
+        expected = ['FREQ', 'RST_RCVD']
+        self.assertListEqual(expected,are_minimum_qso_data_present(fields_missing))
 
     def test_all_fields_with_missing_data(self):
         data_missing = {"CALL": "AAA", "QSO_DATE": "", "TIME_ON": "182500", "FREQ": "", "MODE": "FT8",
                         "RST_SENT": "-15",
                         "RST_RCVD": "-15"}
-        self.assertFalse(are_minimum_qso_data_present(data_missing))
+        expected = ['QSO_DATE', 'FREQ']
+        self.assertListEqual(expected, are_minimum_qso_data_present(data_missing))
+
 
     def test_minimal_qso_with_fields_and_data(self):
         valid_qso = {"CALL": "AAA", "QSO_DATE": "20200117", "TIME_ON": "182500", "FREQ": "7.012345", "MODE": "FT8",
                      "RST_SENT": "-15", "RST_RCVD": "-15"}
-        self.assertTrue(are_minimum_qso_data_present(valid_qso))
+        self.assertListEqual([], are_minimum_qso_data_present(valid_qso))
 
 
 class MappingBandsAndFrequency(TestCase):
