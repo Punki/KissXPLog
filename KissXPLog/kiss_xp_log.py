@@ -62,6 +62,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
 
+        self.all_possible_missing_fields = {'CALL': self.ui.le_call, 'FREQ': self.ui.le_freq, 'MODE': self.ui.cb_mode,
+                                            'RST_SENT': self.ui.le_rst_sent, 'RST_RCVD': self.ui.le_rst_rcvd}
+
         self.modes = MODES_WITH_SUBMODE
         self.ui.cb_canton.setDisabled(True)
 
@@ -516,29 +519,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    }
         return new_qso
 
+    def clear_missing_fields_border(self):
+        # Reset Style Sheet on Input Fields
+        for field in self.all_possible_missing_fields.values():
+            field.setStyleSheet("")
+
+    def set_boarder_on_missing_fields(self, missing_fields):
+        self.clear_missing_fields_border()
+        # Set a Red Border on Missing Input Fields
+        for missing_field in missing_fields:
+            if missing_field in self.all_possible_missing_fields:
+                self.all_possible_missing_fields[missing_field].setStyleSheet("border : 1px solid red")
+
     def save_new_log_entry(self):
         new_qso = self.get_dict_from_inputform()
         new_qso = remove_empty_fields(new_qso)
         missing_fields = are_minimum_qso_data_present(new_qso)
         if not missing_fields:
+            self.clear_missing_fields_border()
             self.clear_new_log_entry_form()
             self.model.add_new_qso_method_two(new_qso)
-            # self.model.add_new_qso_method_one(new_qso)
         else:
             show_error_message("No Valid QSO", "Please fill in all the required fields.")
-            all_possible_missing_fields = {'CALL': self.ui.le_call,
-                                           'FREQ': self.ui.le_freq,
-                                           'MODE': self.ui.cb_mode,
-                                           'RST_SENT': self.ui.le_rst_sent,
-                                           'RST_RCVD': self.ui.le_rst_rcvd}
-
-            # Reset Style Sheet on Input Fields
-            for field in all_possible_missing_fields.values():
-                field.setStyleSheet("")
-            # Set a Red Border on Missing Input Fields
-            for missing_field in missing_fields:
-                if missing_field in all_possible_missing_fields:
-                    all_possible_missing_fields[missing_field].setStyleSheet("border : 1px solid red")
+            self.set_boarder_on_missing_fields(missing_fields)
 
     def clear_new_log_entry_form(self):
         self.update_qso = False
@@ -570,6 +573,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.ui.dateEdit.setDate(QDate.fromString("20000101", "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString('000000', "HHmmss"))
+
+        self.clear_missing_fields_border()
 
     # Switch verbergen/anzeigen von Tabellenspalte
     def hide_and_seek(self):
