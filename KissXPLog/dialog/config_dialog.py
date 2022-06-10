@@ -19,7 +19,6 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.cb_autosave_interval.setMinimum(0)
         self.checked_bands = None
         self.checked_modes = None
-
         self.load_config()
 
         # Alle möglichen Werte
@@ -31,6 +30,8 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.pb_chancel.clicked.connect(self.close)
         self.ui2.pb_bands_filter.clicked.connect(self.show_bands_filter_dialog)
         self.ui2.pb_modes_filter.clicked.connect(self.show_modes_filter_dialog)
+
+        self.ui2.cb_loglevel.addItems(["NOSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"])
 
     def load_config(self):
         # Callsign Uppercase
@@ -77,6 +78,23 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
             my_modes_with_sub[mode] = MODES_WITH_SUBMODE.get(mode)
         self.other_class_handle.user_config.user_settings['MY_Modes'] = self.checked_modes
         self.other_class_handle.user_config.save_user_settings_to_file()
+
+        # set Logging Level
+        logging_level = self.ui2.cb_loglevel.currentText()
+        if logging_level == "NOSET":
+            logging.getLogger().setLevel(logging.NOTSET)
+        elif logging_level == "DEBUG":
+            logging.getLogger().setLevel(logging.DEBUG)
+        elif logging_level == "INFO":
+            logging.getLogger().setLevel(logging.INFO)
+        elif logging_level == "WARN":
+            logging.getLogger().setLevel(logging.WARNING)
+        elif logging_level == "ERROR":
+            logging.getLogger().setLevel(logging.ERROR)
+        elif logging_level == "CRITICAL":
+            logging.getLogger().setLevel(logging.CRITICAL)
+
+        #print("Set Logging Level to {}".format(logging.getLogger().getEffectiveLevel()))
 
         # Set Settings Live:
         self.other_class_handle.ui.cb_mode.clear()

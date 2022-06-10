@@ -6,6 +6,7 @@ work_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = os.path.join(work_dir, "data")
 config_file = os.path.join(data_dir, "config.json")
 plist_path = os.path.join(data_dir, 'cty.plist')
+logfile_path = os.path.join(data_dir, "kissXPLog.log")
 
 
 class UserConfig:

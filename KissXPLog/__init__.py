@@ -17,7 +17,7 @@ from KissXPLog.messages import logging_setup
 
 
 def main():
-    logging_setup("KissXPLog.log")
+    logging_setup()
 
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)

@@ -123,7 +123,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _createActions(self):
         # File Menu Actions
-        self.configAction = QAction("Show Konfig Dialog", self)
+        self.configAction = QAction("Show Config Dialog", self)
         self.saveAction = QAction("&Save Table", self)
         self.loadAction = QAction("&Load Table", self)
         self.importAdifAction = QAction("&Import Adif", self)
