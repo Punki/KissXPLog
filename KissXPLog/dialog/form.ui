@@ -26,11 +26,43 @@
    <string>Widget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="2" column="2">
-    <widget class="QPushButton" name="pb_chancel">
-     <property name="text">
-      <string>Chancel</string>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="gb_my_data">
+     <property name="title">
+      <string>My Data:</string>
      </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lb_my_call">
+        <property name="text">
+         <string>My Call:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="le_my_call"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lb_my_cqzone">
+        <property name="text">
+         <string>CQ-Zone</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="le_my_cqzone"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lb_my_ituzone">
+        <property name="text">
+         <string> ITU-Zone</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="le_my_ituzone"/>
+      </item>
+     </layout>
     </widget>
    </item>
    <item row="0" column="0">
@@ -79,6 +111,13 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pb_chancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
     </widget>
    </item>
    <item row="2" column="0">
@@ -199,43 +238,21 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="gb_my_data">
+   <item row="1" column="2">
+    <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>My Data:</string>
+      <string>Loglevel</string>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="lb_my_call">
-        <property name="text">
-         <string>My Call:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="le_my_call"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lb_my_cqzone">
-        <property name="text">
-         <string>CQ-Zone</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="le_my_cqzone"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lb_my_ituzone">
-        <property name="text">
-         <string> ITU-Zone</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="le_my_ituzone"/>
-      </item>
-     </layout>
+     <widget class="QComboBox" name="cb_loglevel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>111</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>

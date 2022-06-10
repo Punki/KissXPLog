@@ -2,9 +2,10 @@ import logging
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+from KissXPLog.config import logfile_path
 
 
-def logging_setup(logfile):
+def logging_setup():
     """
     Sets up a basic logging environment. Per default, logs everything at DEBUG level
     Parameters
@@ -17,10 +18,9 @@ def logging_setup(logfile):
     None
     """
     logging.basicConfig(
-        filename=logfile,  # All logs are written into this logfile
+        filename=logfile_path,  # All logs are written into this logfile
         format='%(asctime)s: %(threadName)s - %(name)s - %(levelname)s - %(message)s',
         # The formate is [datatimee]: [threadname] - [name] - [level] - [message]
-        level=logging.DEBUG,  # Everything will be logged. Possible levels: DEBUG, INFO, WARN, ERROR, CRITICAL
         datefmt='%Y/%m/%d %H:%M:%S'  # datetime format: 2019/03/26 13:59:09
     )
 
