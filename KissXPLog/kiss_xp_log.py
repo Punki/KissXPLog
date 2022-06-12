@@ -326,7 +326,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.modes = self.user_config.user_settings.get('MY_Modes')
         else:
             self.bands = BAND_WITH_FREQUENCY
-        messages.set_log_level(self.user_config.user_settings.get('LogLevel'))
+        logging.getLogger().setLevel(self.user_config.user_settings.get('LogLevel'))
+
 
     def show_config_window(self):
         self.cdw = ConfigDialog(self)

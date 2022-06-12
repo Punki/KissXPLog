@@ -24,26 +24,6 @@ def logging_setup():
         datefmt='%Y/%m/%d %H:%M:%S'  # datetime format: 2019/03/26 13:59:09
     )
 
-
-def set_log_level(logging_level):
-    print("Log level switched to: ", logging_level)
-    # set Logging Level
-    if logging_level == "NOTSET":
-        logging.getLogger().setLevel(logging.NOTSET)
-    elif logging_level == "DEBUG":
-        logging.getLogger().setLevel(logging.DEBUG)
-    elif logging_level == "INFO":
-        logging.getLogger().setLevel(logging.INFO)
-    elif logging_level == "WARN":
-        logging.getLogger().setLevel(logging.WARNING)
-    elif logging_level == "ERROR":
-        logging.getLogger().setLevel(logging.ERROR)
-    elif logging_level == "CRITICAL":
-        logging.getLogger().setLevel(logging.CRITICAL)
-
-# print("Set Logging Level to {}".format(logging.getLogger().getEffectiveLevel()))
-
-
 def show_info_message(title, message):
     msg_box = QtWidgets.QMessageBox()
     msg_box.setIcon(QMessageBox.Icon.Information)

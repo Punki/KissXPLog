@@ -1,4 +1,5 @@
 import logging
+from venv import logger
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog
@@ -20,7 +21,13 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.cb_autosave_interval.setMinimum(0)
         self.checked_bands = None
         self.checked_modes = None
-        self.ui2.cb_loglevel.addItems(["NOTSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"])
+        self.loglevel = {"NOTSET": [logging.NOTSET],
+                             'DEBUG': [logging.DEBUG],
+                             'INFO': [logging.INFO],
+                             'WARN': [logging.WARN],
+                             'ERROR': [logging.ERROR],
+                             'CRITICAL': [logging.CRITICAL]}
+        self.ui2.cb_loglevel.addItems(self.loglevel)
         self.load_config()
 
         # Alle möglichen Werte
@@ -32,8 +39,6 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.pb_chancel.clicked.connect(self.close)
         self.ui2.pb_bands_filter.clicked.connect(self.show_bands_filter_dialog)
         self.ui2.pb_modes_filter.clicked.connect(self.show_modes_filter_dialog)
-
-
 
     def load_config(self):
         # Callsign Uppercase
@@ -85,9 +90,8 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.other_class_handle.user_config.save_user_settings_to_file()
 
         # set Logging Level
-        logging_level = self.ui2.cb_loglevel.currentText()
-        messages.set_log_level(logging_level)
-
+        logging.getLogger().setLevel(self.loglevel.get(self.ui2.cb_loglevel.currentText())[0])
+        print("Log level switched to: ", logging.getLevelName(logger.getEffectiveLevel()))
 
         # Set Settings Live:
         self.other_class_handle.ui.cb_mode.clear()
