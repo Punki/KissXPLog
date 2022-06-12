@@ -40,7 +40,20 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="le_my_call"/>
+       <widget class="QLineEdit" name="le_my_call">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>22</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="lb_my_cqzone">
@@ -50,7 +63,20 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="le_my_cqzone"/>
+       <widget class="QLineEdit" name="le_my_cqzone">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>22</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="lb_my_ituzone">
@@ -60,7 +86,20 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="le_my_ituzone"/>
+       <widget class="QLineEdit" name="le_my_ituzone">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>22</height>
+         </size>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -247,10 +286,28 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>40</y>
-        <width>111</width>
-        <height>27</height>
+        <y>22</y>
+        <width>108</width>
+        <height>22</height>
        </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>108</width>
+        <height>22</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>108</width>
+        <height>22</height>
+       </size>
       </property>
      </widget>
     </widget>

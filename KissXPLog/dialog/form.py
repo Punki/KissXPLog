@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'KissXPLog/dialog/form.ui'
+# Form implementation generated from reading ui file 'form.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -31,18 +31,24 @@ class Ui_Widget(object):
         self.lb_my_call.setObjectName("lb_my_call")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.lb_my_call)
         self.le_my_call = QtWidgets.QLineEdit(self.gb_my_data)
+        self.le_my_call.setMinimumSize(QtCore.QSize(0, 22))
+        self.le_my_call.setMaximumSize(QtCore.QSize(16777215, 22))
         self.le_my_call.setObjectName("le_my_call")
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.le_my_call)
         self.lb_my_cqzone = QtWidgets.QLabel(self.gb_my_data)
         self.lb_my_cqzone.setObjectName("lb_my_cqzone")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.lb_my_cqzone)
         self.le_my_cqzone = QtWidgets.QLineEdit(self.gb_my_data)
+        self.le_my_cqzone.setMinimumSize(QtCore.QSize(0, 22))
+        self.le_my_cqzone.setMaximumSize(QtCore.QSize(16777215, 22))
         self.le_my_cqzone.setObjectName("le_my_cqzone")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.le_my_cqzone)
         self.lb_my_ituzone = QtWidgets.QLabel(self.gb_my_data)
         self.lb_my_ituzone.setObjectName("lb_my_ituzone")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.lb_my_ituzone)
         self.le_my_ituzone = QtWidgets.QLineEdit(self.gb_my_data)
+        self.le_my_ituzone.setMinimumSize(QtCore.QSize(0, 22))
+        self.le_my_ituzone.setMaximumSize(QtCore.QSize(16777215, 22))
         self.le_my_ituzone.setObjectName("le_my_ituzone")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.le_my_ituzone)
         self.gridLayout_3.addWidget(self.gb_my_data, 1, 0, 1, 1)
@@ -111,7 +117,14 @@ class Ui_Widget(object):
         self.groupBox_2 = QtWidgets.QGroupBox(Widget)
         self.groupBox_2.setObjectName("groupBox_2")
         self.cb_loglevel = QtWidgets.QComboBox(self.groupBox_2)
-        self.cb_loglevel.setGeometry(QtCore.QRect(10, 40, 111, 27))
+        self.cb_loglevel.setGeometry(QtCore.QRect(10, 22, 108, 22))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.cb_loglevel.sizePolicy().hasHeightForWidth())
+        self.cb_loglevel.setSizePolicy(sizePolicy)
+        self.cb_loglevel.setMinimumSize(QtCore.QSize(108, 22))
+        self.cb_loglevel.setMaximumSize(QtCore.QSize(108, 22))
         self.cb_loglevel.setObjectName("cb_loglevel")
         self.gridLayout_3.addWidget(self.groupBox_2, 1, 2, 1, 1)
 
