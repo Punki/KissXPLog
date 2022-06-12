@@ -719,16 +719,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
     def save_unsaved_changes(self):
-        close_window = True
         if self._do_we_have_unsaved_changes:
-            reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            msgbox = QMessageBox()
+            msgbox.setIcon(QMessageBox.Question)
+            msgbox.setWindowTitle('Window Close')
+            msgbox.setText('Save Changes before Exit?')
+            msgbox.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            msgbox.setDefaultButton(QMessageBox.Yes)
+            reply = msgbox.exec_()
             if reply == QMessageBox.Yes:
-                close_window = self.json_save_file_chooser()
-        return close_window
+                return self.json_save_file_chooser()
+            if reply == QMessageBox.No:
+                return True
+        else:
+            return True
 
     def closeEvent(self, event):
-        if self.save_unsaved_changes():
+        msgbox_return = self.save_unsaved_changes()
+        if msgbox_return:
             event.accept()
         else:
             event.ignore()
