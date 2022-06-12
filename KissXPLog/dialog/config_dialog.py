@@ -3,6 +3,7 @@ import logging
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog
 
+from KissXPLog import messages
 from KissXPLog.const_adif_fields import MODES_WITH_SUBMODE, BAND_WITH_FREQUENCY
 from KissXPLog.dialog.filter_dialog import FilterDialog
 from KissXPLog.dialog.form import Ui_Widget
@@ -40,9 +41,11 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         my_call = self.other_class_handle.user_config.user_settings['STATION_CALLSIGN']
         my_cq_zone = self.other_class_handle.user_config.user_settings['MY_CQ_ZONE']
         my_itu_zone = self.other_class_handle.user_config.user_settings['MY_ITU_ZONE']
+        my_loglevel = self.other_class_handle.user_config.user_settings['LogLevel']
         self.ui2.le_my_call.setText(my_call)
         self.ui2.le_my_cqzone.setText(my_cq_zone)
         self.ui2.le_my_ituzone.setText(my_itu_zone)
+        self.ui2.cb_loglevel.setCurrentText(my_loglevel)
 
         self.ui2.cb_autosave.setChecked(self.other_class_handle.autosave)
         self.ui2.cb_autosave_interval.setValue(self.other_class_handle.autosave_interval)
@@ -72,6 +75,7 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.other_class_handle.user_config.user_settings['STATION_CALLSIGN'] = self.ui2.le_my_call.text()
         self.other_class_handle.user_config.user_settings['MY_CQ_ZONE'] = self.ui2.le_my_cqzone.text()
         self.other_class_handle.user_config.user_settings['MY_ITU_ZONE'] = self.ui2.le_my_ituzone.text()
+        self.other_class_handle.user_config.user_settings['LogLevel'] = self.ui2.cb_loglevel.currentText()
 
         my_modes_with_sub = {}
         for mode in self.checked_modes:
@@ -81,20 +85,8 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
 
         # set Logging Level
         logging_level = self.ui2.cb_loglevel.currentText()
-        if logging_level == "NOSET":
-            logging.getLogger().setLevel(logging.NOTSET)
-        elif logging_level == "DEBUG":
-            logging.getLogger().setLevel(logging.DEBUG)
-        elif logging_level == "INFO":
-            logging.getLogger().setLevel(logging.INFO)
-        elif logging_level == "WARN":
-            logging.getLogger().setLevel(logging.WARNING)
-        elif logging_level == "ERROR":
-            logging.getLogger().setLevel(logging.ERROR)
-        elif logging_level == "CRITICAL":
-            logging.getLogger().setLevel(logging.CRITICAL)
+        messages.set_log_level(logging_level)
 
-        #print("Set Logging Level to {}".format(logging.getLogger().getEffectiveLevel()))
 
         # Set Settings Live:
         self.other_class_handle.ui.cb_mode.clear()

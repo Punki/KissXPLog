@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog import UserConfig, config
+from KissXPLog import UserConfig, config, messages
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
     frequency_to_band
 from KissXPLog.const_adif_fields import QSL_RCVD_ENUMERATION, QSL_SENT_ENUMERATION, MODES_WITH_SUBMODE, \
@@ -26,6 +26,7 @@ from KissXPLog.table_model import TableModel
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    # Set load_user_settings to True for prod!
     def __init__(self, load_user_settings=False, load_last_used_db=True):
         super().__init__()
         self.cdw = None
@@ -325,6 +326,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.modes = self.user_config.user_settings.get('MY_Modes')
         else:
             self.bands = BAND_WITH_FREQUENCY
+        messages.set_log_level(self.user_config.user_settings.get('LogLevel'))
 
     def show_config_window(self):
         self.cdw = ConfigDialog(self)

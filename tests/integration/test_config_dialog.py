@@ -27,6 +27,11 @@ class TestShowUserSettingsInConfigDialog(TestCase):
         self.window.cdw.load_config()
         self.assertEqual("CCCCC", self.window.cdw.ui2.le_my_ituzone.text())
 
+    def test_log_level_critical(self):
+        self.window.user_config.user_settings['LogLevel'] = "CRITICAL"
+        self.window.cdw.load_config()
+        self.assertEqual("CRITICAL", self.window.cdw.ui2.cb_loglevel.currentText())
+
     def test_autosave(self):
         self.window.autosave = True
         self.window.cdw.load_config()
