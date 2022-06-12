@@ -43,13 +43,13 @@
        <widget class="QLineEdit" name="le_my_call">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>108</width>
           <height>22</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
+          <width>108</width>
           <height>22</height>
          </size>
         </property>
@@ -66,13 +66,13 @@
        <widget class="QLineEdit" name="le_my_cqzone">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>108</width>
           <height>22</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
+          <width>108</width>
           <height>22</height>
          </size>
         </property>
@@ -89,13 +89,13 @@
        <widget class="QLineEdit" name="le_my_ituzone">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>108</width>
           <height>22</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
+          <width>108</width>
           <height>22</height>
          </size>
         </property>
@@ -118,6 +118,18 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="1" column="0">
        <widget class="QLabel" name="label_2">
+        <property name="minimumSize">
+         <size>
+          <width>72</width>
+          <height>19</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>72</width>
+          <height>19</height>
+         </size>
+        </property>
         <property name="text">
          <string>Every(min)</string>
         </property>
@@ -138,10 +150,16 @@
       </item>
       <item row="0" column="0">
        <widget class="QCheckBox" name="cb_autosave">
+        <property name="minimumSize">
+         <size>
+          <width>72</width>
+          <height>19</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>80</width>
-          <height>16777215</height>
+          <width>72</width>
+          <height>19</height>
          </size>
         </property>
         <property name="text">
@@ -278,24 +296,30 @@
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="gb_logging">
+     <property name="minimumSize">
+      <size>
+       <width>141</width>
+       <height>124</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>141</width>
+       <height>124</height>
+      </size>
+     </property>
      <property name="title">
       <string>Loglevel</string>
      </property>
      <widget class="QComboBox" name="cb_loglevel">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>22</y>
+        <x>18</x>
+        <y>20</y>
         <width>108</width>
         <height>22</height>
        </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
       </property>
       <property name="minimumSize">
        <size>

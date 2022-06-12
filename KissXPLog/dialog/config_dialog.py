@@ -20,6 +20,7 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.cb_autosave_interval.setMinimum(0)
         self.checked_bands = None
         self.checked_modes = None
+        self.ui2.cb_loglevel.addItems(["NOTSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"])
         self.load_config()
 
         # Alle möglichen Werte
@@ -32,7 +33,7 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.pb_bands_filter.clicked.connect(self.show_bands_filter_dialog)
         self.ui2.pb_modes_filter.clicked.connect(self.show_modes_filter_dialog)
 
-        self.ui2.cb_loglevel.addItems(["NOSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"])
+
 
     def load_config(self):
         # Callsign Uppercase

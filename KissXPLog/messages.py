@@ -28,7 +28,7 @@ def logging_setup():
 def set_log_level(logging_level):
     print("Log level switched to: ", logging_level)
     # set Logging Level
-    if logging_level == "NOSET":
+    if logging_level == "NOTSET":
         logging.getLogger().setLevel(logging.NOTSET)
     elif logging_level == "DEBUG":
         logging.getLogger().setLevel(logging.DEBUG)

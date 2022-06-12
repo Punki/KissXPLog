@@ -27,7 +27,7 @@ from KissXPLog.table_model import TableModel
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Set load_user_settings to True for prod!
-    def __init__(self, load_user_settings=False, load_last_used_db=True):
+    def __init__(self, load_user_settings=True, load_last_used_db=True):
         super().__init__()
         self.cdw = None
         self.ui = Ui_MainWindow()
