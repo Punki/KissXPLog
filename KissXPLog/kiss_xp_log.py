@@ -2,15 +2,18 @@ import hashlib
 import json
 import logging
 import re
+import sys
 import threading
+import traceback
 from functools import partial
 from time import sleep
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
+from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime, QObject, pyqtSignal, QRunnable, \
+    pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog import UserConfig, config, messages
+from KissXPLog import UserConfig, config, qrz_lookup
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
     frequency_to_band
 from KissXPLog.const_adif_fields import QSL_RCVD_ENUMERATION, QSL_SENT_ENUMERATION, MODES_WITH_SUBMODE, \
@@ -19,16 +22,56 @@ from KissXPLog.dialog.config_dialog import ConfigDialog
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
-from KissXPLog.qrz_lookup import get_dxcc_from_callsign, update_plist
+from KissXPLog.qrz_lookup import update_plist
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
     prune_qsos
 from KissXPLog.table_model import TableModel
+
+
+class WorkerSignals(QObject):
+    finished = pyqtSignal()
+    error = pyqtSignal(tuple)
+    result = pyqtSignal(object)
+
+
+class Worker(QRunnable):
+
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+    @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function with passed args, kwargs.
+        '''
+
+        # Retrieve args/kwargs here; and fire processing using them
+        try:
+            result = self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Set load_user_settings to True for prod!
     def __init__(self, load_user_settings=True, load_last_used_db=True):
         super().__init__()
+
+        self.threadpool = QThreadPool()
+        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+
         self.cdw = None
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -158,7 +201,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
-        self.ui.le_call.editingFinished.connect(self.new_dxcc_lookup_thread)
+        self.ui.le_call.editingFinished.connect(self.start_lookup_callsign_in_tread)
+
         # UE: Fill Freq from Band und Vice Versa
         self.ui.le_freq.textEdited.connect(self.set_band_from_frequency)
         self.ui.cb_band.currentIndexChanged.connect(self.set_frequency_from_band)
@@ -203,6 +247,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_update_file = QAction("Update File", self)
         self.dev_save_config = QAction("Save Config", self)
         self.dev_change_title = QAction("Change Title", self)
+        self.dev_thread = QAction("StartThread", self)
 
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
@@ -214,6 +259,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         devMenu.addAction(self.dev_change_title)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
+        devMenu.addAction(self.dev_thread)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
         self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
         self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
@@ -223,6 +269,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_change_title.triggered.connect(self.dev_set_new_window_title)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
+        self.dev_thread.triggered.connect(self.start_lookup_callsign_in_tread)
+
+    def start_lookup_callsign_in_tread(self):
+        # Just for the User Experience..
+        self.set_time_after_callsign_enter()
+        # Pass the function to execute
+        worker = Worker(qrz_lookup.get_dxcc_from_callsign, self.ui.le_call.text())
+        worker.signals.result.connect(self.auto_enter_dxcc_infos_from_callsign)
+        worker.signals.finished.connect(self.thread_complete)
+        # Execute
+        self.threadpool.start(worker)
+
+    def thread_complete(self):
+        print("THREAD COMPLETE!")
 
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)
@@ -240,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def dev_fill_all_fields(self):
         # Just minimal infos for a valid Qso, dev only.
         self.ui.le_call.setText("HB9")
-        self.new_dxcc_lookup_thread()
+        self.start_lookup_callsign_in_tread()
         self.ui.cb_mode.setCurrentIndex(self.ui.cb_mode.findText("CW"))
         self.ui.cb_band.setCurrentIndex(self.ui.cb_band.findText("80m"))
         self.ui.cbo_sent_options.setCurrentIndex(self.ui.cbo_sent_options.findText("Yes"))
@@ -328,7 +388,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.bands = BAND_WITH_FREQUENCY
         logging.getLogger().setLevel(self.user_config.user_settings.get('LogLevel'))
 
-
     def show_config_window(self):
         self.cdw = ConfigDialog(self)
         self.cdw.show()
@@ -402,21 +461,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 elif self.ui.cb_mode.currentText() == "SSB":
                     self.ui.le_rst_sent.setText("59")
                     self.ui.le_rst_rcvd.setText("59")
-
-    def new_dxcc_lookup_thread(self):
-        callsign = self.ui.le_call.text()
-        t = threading.Thread(target=self.dxcc_lookup, args=(callsign,), daemon=True)
-        t.start()
-
-    def dxcc_lookup(self, callsign):
-        try:
-            all_dxcc = get_dxcc_from_callsign(callsign)
-        except TypeError:
-            show_error_message("No QRZ-info found",
-                               f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
-            return
-        self.set_time_after_callsign_enter()
-        self.auto_enter_dxcc_infos_from_callsign(all_dxcc)
 
     def set_time_after_callsign_enter(self):
         # if time not changed, set to now:

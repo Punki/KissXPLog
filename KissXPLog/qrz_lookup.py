@@ -32,12 +32,12 @@ def get_plist():
 
 
 def get_dxcc_from_callsign(callsign: str):
+    logging.debug(f"Get Data from: {callsign}")
     dxcc = get_plist()
     # Add all keys to all_regex
     all_regex = list(dxcc.keys())
     # Sort list by callsign-length (descending)
     all_regex.sort(key=len, reverse=True)
-
     for element in all_regex:
         if callsign.startswith(element):
             logging.debug("Found Match")
