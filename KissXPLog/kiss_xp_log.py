@@ -275,7 +275,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Just for the User Experience..
         self.set_time_after_callsign_enter()
         # Pass the function to execute
-        worker = Worker(qrz_lookup.get_dxcc_from_callsign, self.ui.le_call.text())
+        worker = Worker(self.get_dxcc_from_callsign, self.ui.le_call.text())
         worker.signals.result.connect(self.auto_enter_dxcc_infos_from_callsign)
         worker.signals.finished.connect(self.thread_complete)
         # Execute
@@ -283,6 +283,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def thread_complete(self):
         print("THREAD COMPLETE!")
+
+    def get_dxcc_from_callsign(self, callsign: str):
+        # Buffer the File for the Session..
+        if not self.all_dxcc:
+            logging.debug(f"Get Data from: {callsign}")
+            all_dxcc = qrz_lookup.get_plist()
+            self.all_dxcc = all_dxcc
+        else:
+            all_dxcc = self.all_dxcc
+        # Add all keys to all_dxcc_keys
+        all_dxcc_keys = list(all_dxcc.keys())
+        # Sort list by callsign-length (descending)
+        all_dxcc_keys.sort(key=len, reverse=True)
+        for key in all_dxcc_keys:
+            if callsign.startswith(key):
+                logging.debug("Found Match")
+                return all_dxcc.get(key)
+        logging.debug(f"No DXCC Data found to {callsign}")
 
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)

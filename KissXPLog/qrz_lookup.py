@@ -1,7 +1,9 @@
 import logging
 import os.path
 import plistlib
+
 import requests
+
 from KissXPLog import config
 
 
@@ -29,17 +31,3 @@ def get_plist():
         plist_data = "File not found"
         logging.error("File {} not found".format(str(config.plist_path)))
     return plist_data
-
-
-def get_dxcc_from_callsign(callsign: str):
-    logging.debug(f"Get Data from: {callsign}")
-    dxcc = get_plist()
-    # Add all keys to all_regex
-    all_regex = list(dxcc.keys())
-    # Sort list by callsign-length (descending)
-    all_regex.sort(key=len, reverse=True)
-    for element in all_regex:
-        if callsign.startswith(element):
-            logging.debug("Found Match")
-            return dxcc.get(element)
-    logging.debug(f"No DXCC Data found to {callsign}")
