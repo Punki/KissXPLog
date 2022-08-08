@@ -114,6 +114,40 @@ class TestJsonFileHandling(TestCase):
         fulloutput = self.window.get_dict_from_inputform()
         self.assertEqual("", fulloutput.get('QSLSDATE'))
 
+    # QSL EQSL Options
+    def test_eqsl_option_True(self):
+        input_data = {'EQSL_QSL_SENT': 'Y', 'EQSL_QSL_RCVD': 'Y'}
+        self.window.fill_values_to_edit_form(input_data)
+        fulloutput = self.window.get_dict_from_inputform()
+        only_test_fields = {'EQSL_QSL_SENT': fulloutput.get('EQSL_QSL_SENT'),
+                            'EQSL_QSL_RCVD': fulloutput.get('EQSL_QSL_RCVD')}
+        self.assertEqual(input_data, only_test_fields)
+
+    def test_eqsl_option_Nothing(self):
+        input_data = {'EQSL_QSL_SENT': '', 'EQSL_QSL_RCVD': ''}
+        self.window.fill_values_to_edit_form(input_data)
+        fulloutput = self.window.get_dict_from_inputform()
+        only_test_fields = {'EQSL_QSL_SENT': fulloutput.get('EQSL_QSL_SENT'),
+                            'EQSL_QSL_RCVD': fulloutput.get('EQSL_QSL_RCVD')}
+        self.assertEqual(input_data, only_test_fields)
+
+    # QSL LOTW Options
+    def test_lotw_option_True(self):
+        input_data = {'LOTW_QSL_SENT': 'Y', 'LOTW_QSL_RCVD': 'Y'}
+        self.window.fill_values_to_edit_form(input_data)
+        fulloutput = self.window.get_dict_from_inputform()
+        only_test_fields = {'LOTW_QSL_SENT': fulloutput.get('LOTW_QSL_SENT'),
+                            'LOTW_QSL_RCVD': fulloutput.get('LOTW_QSL_RCVD')}
+        self.assertEqual(input_data, only_test_fields)
+
+    def test_lotw_option_Nothing(self):
+        input_data = {'LOTW_QSL_SENT': '', 'LOTW_QSL_RCVD': ''}
+        self.window.fill_values_to_edit_form(input_data)
+        fulloutput = self.window.get_dict_from_inputform()
+        only_test_fields = {'LOTW_QSL_SENT': fulloutput.get('LOTW_QSL_SENT'),
+                            'LOTW_QSL_RCVD': fulloutput.get('LOTW_QSL_RCVD')}
+        self.assertEqual(input_data, only_test_fields)
+
     # QSL Sent-Date Error Checks -> Set Date to Today:
     def test_qslSentDate_is_None(self):
         input_data = {'QSL_SENT': 'Y', 'QSLSDATE': None}

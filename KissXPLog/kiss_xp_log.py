@@ -570,11 +570,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                        self.ui.de_qsl_sent_date.date().toString(
                            "yyyyMMdd") if self.ui.de_qsl_sent_date.isEnabled() else ''),
 
-                   'EQSL_QSL_RCVD': True if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
-                   'EQSL_QSL_SENT': True if self.ui.cb_eqsl_sent_new.isChecked() else '',
+                   'EQSL_QSL_RCVD': 'Y' if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
+                   'EQSL_QSL_SENT': 'Y' if self.ui.cb_eqsl_sent_new.isChecked() else '',
 
-                   'LOTW_QSL_RCVD': True if self.ui.cb_lotw_rcvd_new.isChecked() else '',
-                   'LOTW_QSL_SENT': True if self.ui.cb_lotw_sent_new.isChecked() else '',
+                   'LOTW_QSL_RCVD': 'Y' if self.ui.cb_lotw_rcvd_new.isChecked() else '',
+                   'LOTW_QSL_SENT': 'Y' if self.ui.cb_lotw_sent_new.isChecked() else '',
 
                    'COUNTRY': self.ui.le_country.text(),
                    'STATE': self.ui.cb_canton.currentText(),
