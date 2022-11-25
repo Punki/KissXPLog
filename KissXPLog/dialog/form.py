@@ -185,7 +185,7 @@ class Ui_Widget(object):
 
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
-        Widget.setWindowTitle(_translate("Widget", "Widget"))
+        Widget.setWindowTitle(_translate("Widget", "Configuration"))
         self.gb_my_data.setTitle(_translate("Widget", "My Data:"))
         self.lb_my_call.setText(_translate("Widget", "My Call:"))
         self.lb_my_cqzone.setText(_translate("Widget", "CQ-Zone:"))
