@@ -1,16 +1,16 @@
-# Einführung
-
-KissXPLog
-
-= KISS + XP + Log
+# KissXPLog
 
 =  **K**eep **I**t **S**imple, **S**tupid + Cross(**X**)-**P**latform + Log
 
 ----------
 
+![Startfenser der KissXPLog Applikation](/home/alex/DEV/KissXPLog/static/Scrreenshot.png "KissXPLog")
+
+
+
 Dieses Programm kann zum Verwalten von Verbindungen im Amateurfunk benutzt werden.
 
-## Motivation
+# Motivation
 
 * Open Source
 * Fokus auf die Verwaltung von QSOs, kein All in One Programm.
@@ -18,104 +18,6 @@ Dieses Programm kann zum Verwalten von Verbindungen im Amateurfunk benutzt werde
 * Aktive Entwicklung und einfache Dateiformate um Inkompatibilitäten zu vermeiden.
 * Cross Platform
 * Lernprojekt für Python ;)
-
-## Adif Format
-
-Siehe hierzu unter: https://www.adif.org/
-
-TLDR: Das Format speichert Informationen in Triples, welche jeweils aus einem Namen, Länge und Wert bestehen.\
-Z.B: `<call:5>AAAAA`
-
-* Name des Feldes: "CALL"
-* Länge des Feldes: 5
-* Wert des Feldes: "AAAAA"
-
-## Minimum für ein gültiges QSO
-
-* Callsign
-* Date
-* UTC Time
-* Frequency
-* Mode
-* RST Sent/Rst RCVD
-
-# Building
-
-## PyInstaller
-
-Mittels [PyInstaller](https://github.com/pyinstaller/pyinstaller) kann aus dem Python-code betriebssystemunabhängig eine
-ausführbare Datei erstellt werden (Linux/Windows).
-
-Um das Projekt auf einem Debian-basierten System selbst zu kompilieren, müssen noch einige Packages installiert werden:
-
-```commandline
-sudo apt install python3-venv binutils python3-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
-```
-
-ab hier ist es relativ betriebssystemunabhängig:
-
-```commandline
-git clone https://github.com/Punki/KissXPLog
-cd KissXPLog
-git pull
-python3 -m venv venv
-. venv/bin/activate
-bzw. 'venv\Scripts\activate.bat' auf Windows
-pip install -r requirements.txt
-pip install pyinstaller
-```
-
-Jetzt kann mittels des installierten PyInstaller die ausführbare Datei erstellt werden:
-
-```commandline
-pyinstaller build.spec
-```
-
-Dieser Befehl erstellt mithilfe der [build.spec](build.spec) die Datei 'dist/KissXPLog(.exe)', mit das Programm
-gestartet werden kann.
-
-## Virtual Environment (venv)
-
-Das venv kann entweder direkt via IDE erstellt werden, oder via Python-Konsole mit
-`python -m venv venv`.
-
-Das neue venv wird mit `. venv/bin/activate` (UNIX) bzw. `venv\Scripts\activate.bat` (Windows) aktviert.
-
-Im neuen venv werden die requirements jetzt mit `pip install -r requirements.txt` installiert.
-
-## GUI-Änderungen:
-
-GUI-Änderungen werden mit QT Designer im File [logger_gui.ui](KissXPLog/logger_gui.ui) gemacht.\
-Diese Änderungen werden mit folgendem Befehl kompiliert:\
-`pyuic5 -x logger_gui.ui -o logger_gui.py`
-
-## Files:
-
-MainWindow: [kiss_xp_log.py](KissXPLog/kiss_xp_log.py) \
-GUI: [logger_gui.py](KissXPLog/logger_gui.py) -> Nicht manuell ändern!\
-Tabellen Modell: [table_model.py](KissXPLog/table_model.py) \
-QSO List Mutations: [qso_operations.py](KissXPLog/qso_operations.py)\
-File Operations: [file_operations.py](KissXPLog/file_operations.py)\
-ADIF Data Operations: [adif.py](KissXPLog/adif.py)\
-ADIF Feld Konstanten: [const_adif_fields.py](KissXPLog/const_adif_fields.py)\
-Benutzer Konfiguration: [config.py](KissXPLog/config.py)\
-Logging Setup: [messages.py](KissXPLog/messages.py)\
-QRZ Lookup: [qrz_lookup.py](KissXPLog/qrz_lookup.py)
-
-# Datenstruktur:
-
-## QSO
-
-Jedes QSO wird in einem Dictionary gespeichert, welche sich jeweils aus Key:Value Tupeln zusammensetzt:\
-`{"CALL": "AAAAA", "QSO_DATE": "20001111", ...}`\
-Mehrere dieser Dictionary's werden in einer Liste zusammengefasst:
-
-  ``` 
-[
-{"CALL": "AAAAAA", "QSO_DATE": "20001111"},
- {"CALL": "BBBBBB", "QSO_DATE": "20002222"}
-]
-  ```
 
 # Bedienung:
 
@@ -137,7 +39,11 @@ Es wird nach Rufzeichen gefiltert.
 Diese lässt sich wie gewohnt sortieren mit einem Klick auf die Kopfleiste. Spalten lassen sich über Column Filter
 ausblenden.
 
-## Konfiguration -> File->Show Konfig Dialog
+## Konfiguration
+
+Über 'File --> Show Config Dialog'
+
+![Konfigurationsdialog KissXPLog](/home/alex/DEV/KissXPLog/static/Config_Dialog.png "Config")
 
 ### Autosave
 
@@ -212,17 +118,117 @@ Die Eingabemaske wird zurückgesetzt. Die Sortierung der Tabelle wird ebenfalls 
 Läd die aktuellste Version der Cty.dat von: 'https://www.country-files.com/' herunter. Diese wird für das automatische
 Vervollständigen von Qsos benötigt.
 
+# Building
+
+## PyInstaller
+
+Mittels [PyInstaller](https://github.com/pyinstaller/pyinstaller) kann aus dem Python-code betriebssystemunabhängig eine
+ausführbare Datei erstellt werden (Linux/Windows).
+
+Um das Projekt auf einem Debian-basierten System selbst zu kompilieren, müssen noch einige Packages installiert werden:
+
+```commandline
+sudo apt install python3-venv binutils python3-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+```
+
+ab hier ist es relativ betriebssystemunabhängig:
+
+```commandline
+git clone https://github.com/Punki/KissXPLog
+cd KissXPLog
+git pull
+python3 -m venv venv
+. venv/bin/activate
+bzw. 'venv\Scripts\activate.bat' auf Windows
+pip install -r requirements.txt
+pip install pyinstaller
+```
+
+Jetzt kann mittels des installierten PyInstaller die ausführbare Datei erstellt werden:
+
+```commandline
+pyinstaller build.spec
+```
+
+Dieser Befehl erstellt mithilfe der [build.spec](build.spec) die Datei 'dist/KissXPLog(.exe)', mit das Programm
+gestartet werden kann.
+
+## Virtual Environment (venv)
+
+Das venv kann entweder direkt via IDE erstellt werden, oder via Python-Konsole mit
+`python -m venv venv`.
+
+Das neue venv wird mit `. venv/bin/activate` (UNIX) bzw. `venv\Scripts\activate.bat` (Windows) aktviert.
+
+Im neuen venv werden die requirements jetzt mit `pip install -r requirements.txt` installiert.
+
+## GUI-Änderungen:
+
+GUI-Änderungen werden mit QT Designer im File [logger_gui.ui](KissXPLog/logger_gui.ui) gemacht.\
+Diese Änderungen werden mit folgendem Befehl kompiliert:\
+`pyuic5 -x logger_gui.ui -o logger_gui.py`
+
+## Files:
+
+MainWindow: [kiss_xp_log.py](KissXPLog/kiss_xp_log.py) \
+GUI: [logger_gui.py](KissXPLog/logger_gui.py) -> Nicht manuell ändern!\
+Tabellen Modell: [table_model.py](KissXPLog/table_model.py) \
+QSO List Mutations: [qso_operations.py](KissXPLog/qso_operations.py)\
+File Operations: [file_operations.py](KissXPLog/file_operations.py)\
+ADIF Data Operations: [adif.py](KissXPLog/adif.py)\
+ADIF Feld Konstanten: [const_adif_fields.py](KissXPLog/const_adif_fields.py)\
+Benutzer Konfiguration: [config.py](KissXPLog/config.py)\
+Logging Setup: [messages.py](KissXPLog/messages.py)\
+QRZ Lookup: [qrz_lookup.py](KissXPLog/qrz_lookup.py)
+
+# Datenstruktur:
+
+## Adif Format
+
+Siehe hierzu unter: https://www.adif.org/
+
+TLDR: Das Format speichert Informationen in Triples, welche jeweils aus einem Namen, Länge und Wert bestehen.\
+Z.B: `<call:5>AAAAA`
+
+* Name des Feldes: "CALL"
+* Länge des Feldes: 5
+* Wert des Feldes: "AAAAA"
+
+ 
+## QSO
+
+Jedes QSO wird in einem Dictionary gespeichert, welche sich jeweils aus Key:Value Tupeln zusammensetzt:\
+`{"CALL": "AAAAA", "QSO_DATE": "20001111", ...}`\
+Mehrere dieser Dictionary's werden in einer Liste zusammengefasst:
+
+  ``` 
+[
+{"CALL": "AAAAAA", "QSO_DATE": "20001111"},
+ {"CALL": "BBBBBB", "QSO_DATE": "20002222"}
+]
+  ```
+
+### Minimum für ein gültiges QSO
+
+* Callsign
+* Date
+* UTC Time
+* Frequency
+* Mode
+* RST Sent/Rst RCVD
+
+
 
 ----------------------
 
-# Eingebaute Features
+# Features
 
 - Es werden automatisch Kontinent, Land, sowie CQ und ITU Zone beim Verlassen des Rufzeichenfelds erfasst.
 - Für gewisse Modis werden automatisch Default Werte für RST erfasst.
 - Bei der Eingabe der Frequen wird das Band erfasst und Vice Versa.
 - > Es werden keine Felder überschrieben wenn bereits Daten vorhanden sind.
 
-# Geplante Features
+## Geplante Features
 
 - Anzeige ob Tabelle in Edit mode ist oder nicht.
     - Statusleiste
@@ -237,12 +243,3 @@ Vervollständigen von Qsos benötigt.
 
 * [File-Chooser Tests](tests/unit/test_file_chooser_dialog.py) funktioniert nicht auf Linux, da 'keyboard' package unter
   Linux root-Recht will
-
-# Todo:
-
-## Doku:
-
-
-
-
-
