@@ -98,11 +98,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._do_we_have_unsaved_changes = False
 
         self.all_dxcc = {}
+        # DevMode ADD> Show all Fields with Hidden Stuff
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
                           'DXCC', 'COUNTRY', 'STATE', 'Continent', 'ITUZone', 'CQZone', 'QSL_SENT', 'QSL_RCVD',
                           'QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME',
                           'NOTES']
+        # self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
+        #                   'DXCC', 'COUNTRY', 'STATE', 'Continent', 'ITUZone', 'CQZone', 'QSL_SENT', 'QSL_RCVD',
+        #                   'QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME',
+        #                   'NOTES', 'Hidden_Field']
+
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
 
@@ -598,7 +604,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def save_new_log_entry(self):
         new_qso = self.get_dict_from_inputform()
-        new_qso = remove_empty_fields(new_qso)
+        #        new_qso = remove_empty_fields(new_qso)
         missing_fields = are_minimum_qso_data_present(new_qso)
         if not missing_fields:
             self.clear_missing_fields_border()
@@ -682,7 +688,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File will be saved to {filename}")
-            generic_save_data_to_file(filename, self.model.get_data_from_table())
+            # Prune Data
+            pruned_full_qso_list = prune_qsos(self.model.get_data_from_table())
+            generic_save_data_to_file(filename, pruned_full_qso_list)
             self.set_do_we_have_unsaved_changes(False)
             return True
 
@@ -706,7 +714,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"ADIF File {filename} will be exported")
-            generic_save_data_to_file(filename, self.model.get_data_from_table(), self.custom_fields_list)
+            # Prune Data
+            pruned_full_qso_list = prune_qsos(self.model.get_data_from_table())
+            generic_save_data_to_file(filename, pruned_full_qso_list, self.custom_fields_list)
             self.set_do_we_have_unsaved_changes(False)
 
     def adif_load_file_chooser(self):
@@ -735,7 +745,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.update_qso:
             self.update_qso = False
             updated_qso = self.get_dict_from_inputform()
-            updated_qso = remove_empty_fields(updated_qso)
             row = self.row
             self.model.update_single_qso(row, updated_qso)
             self.clear_new_log_entry_form()

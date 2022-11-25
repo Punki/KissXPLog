@@ -10,6 +10,7 @@ from KissXPLog import adif
 from KissXPLog.adif import parse_adif_for_data
 from KissXPLog.file_operations import generic_save_data_to_file, write_file_as_json
 from KissXPLog.kiss_xp_log import read_data_from_json_file, MainWindow
+from KissXPLog.qso_operations import prune_qsos
 
 
 class TestJsonFileHandling(unittest.TestCase):
@@ -79,8 +80,9 @@ class TestJsonFileHandling(unittest.TestCase):
         # Save InputForm
         self.window.save_new_log_entry()
 
-        # Save Table to file
-        generic_save_data_to_file(self.json_outputfile_name2, self.window.model.get_data_from_table())
+        # Save Table to file, all Data get pruned before export, prune method can not easy testet yet
+        pruned_qsos = prune_qsos(self.window.model.get_data_from_table())
+        generic_save_data_to_file(self.json_outputfile_name2, pruned_qsos)
 
         # Read File in for check
         result = read_data_from_json_file(self.json_outputfile_name2)
@@ -100,8 +102,9 @@ class TestJsonFileHandling(unittest.TestCase):
         # Save InputForm
         self.window.save_new_log_entry()
 
-        # Save to File
-        generic_save_data_to_file(self.adif_outputfile_name2, self.window.model.get_data_from_table(),
+        # Save Table to file, all Data get pruned before export, prune method can not easy testet yet
+        pruned_qsos = prune_qsos(self.window.model.get_data_from_table())
+        generic_save_data_to_file(self.adif_outputfile_name2, pruned_qsos,
                                   self.window.custom_fields_list)
 
         result = parse_adif_for_data(self.adif_outputfile_name2)
