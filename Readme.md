@@ -4,7 +4,7 @@
 
 ----------
 
-![Startfenser der KissXPLog Applikation](/home/alex/DEV/KissXPLog/static/Scrreenshot.png "KissXPLog")
+![Startfenser der KissXPLog Applikation](./static/Scrreenshot.png "KissXPLog")
 
 
 
@@ -43,7 +43,7 @@ ausblenden.
 
 Über 'File --> Show Config Dialog'
 
-![Konfigurationsdialog KissXPLog](/home/alex/DEV/KissXPLog/static/Config_Dialog.png "Config")
+![Konfigurationsdialog KissXPLog](./static/Config_Dialog.png "Config")
 
 ### Autosave
 
