@@ -14,14 +14,17 @@ from PyQt5 import QtWidgets
 from KissXPLog.config import *
 from KissXPLog.kiss_xp_log import MainWindow
 from KissXPLog.messages import logging_setup
+from pathlib import Path
 
 
 def main():
-    logging_setup()
-
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
         logging.info(f"Directory {data_dir} created!")
+
+    myfile = Path(logfile_path)
+    myfile.touch(exist_ok=True)
+    logging_setup()
 
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()

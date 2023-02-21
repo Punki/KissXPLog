@@ -2,15 +2,18 @@ import hashlib
 import json
 import logging
 import re
+import sys
 import threading
+import traceback
 from functools import partial
 from time import sleep
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime
+from PyQt5.QtCore import QSortFilterProxyModel, QRegExp, Qt, QDateTime, QDate, QTime, QObject, pyqtSignal, QRunnable, \
+    pyqtSlot, QThreadPool
 from PyQt5.QtWidgets import QAbstractItemView, QMenu, QAction, QFileDialog, QMessageBox
 
-from KissXPLog import UserConfig, config
+from KissXPLog import UserConfig, config, qrz_lookup
 from KissXPLog.adif import parse_adif_for_data, band_to_frequency, \
     frequency_to_band
 from KissXPLog.const_adif_fields import QSL_RCVD_ENUMERATION, QSL_SENT_ENUMERATION, MODES_WITH_SUBMODE, \
@@ -19,15 +22,56 @@ from KissXPLog.dialog.config_dialog import ConfigDialog
 from KissXPLog.file_operations import read_data_from_json_file, initial_file_dialog_config, generic_save_data_to_file
 from KissXPLog.logger_gui import Ui_MainWindow
 from KissXPLog.messages import show_error_message, show_info_message
-from KissXPLog.qrz_lookup import get_dxcc_from_callsign, update_plist
+from KissXPLog.qrz_lookup import update_plist
 from KissXPLog.qso_operations import are_minimum_qso_data_present, remove_empty_fields, add_new_information_to_qso_list, \
     prune_qsos
 from KissXPLog.table_model import TableModel
 
 
+class WorkerSignals(QObject):
+    finished = pyqtSignal()
+    error = pyqtSignal(tuple)
+    result = pyqtSignal(object)
+
+
+class Worker(QRunnable):
+
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+    @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function with passed args, kwargs.
+        '''
+
+        # Retrieve args/kwargs here; and fire processing using them
+        try:
+            result = self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
+
+
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self, load_user_settings=False, load_last_used_db=True):
+    # Set load_user_settings to True for prod!
+    def __init__(self, load_user_settings=True, load_last_used_db=True):
         super().__init__()
+
+        self.threadpool = QThreadPool()
+        #print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+
         self.cdw = None
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -35,6 +79,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._createActions()
         self._createMenuBar()
         self._connectActions()
+        # Just Uncomment if your know what you're doing!
         self._createFullDevMenu()
 
         self.show()
@@ -54,13 +99,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._do_we_have_unsaved_changes = False
 
         self.all_dxcc = {}
+        # DevMode ADD> Show all Fields with Hidden Stuff
 
         self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
                           'DXCC', 'COUNTRY', 'STATE', 'Continent', 'ITUZone', 'CQZone', 'QSL_SENT', 'QSL_RCVD',
                           'QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME',
                           'NOTES']
+        # self.row_index = ['CALL', 'QSO_DATE', 'TIME_ON', 'FREQ', 'BAND', 'MODE', 'SUBMODE', 'RST_SENT', 'RST_RCVD',
+        #                   'DXCC', 'COUNTRY', 'STATE', 'Continent', 'ITUZone', 'CQZone', 'QSL_SENT', 'QSL_RCVD',
+        #                   'QSLSDATE', 'EQSL_QSL_SENT', 'EQSL_QSL_RCVD', 'LOTW_QSL_SENT', 'LOTW_QSL_RCVD', 'NAME',
+        #                   'NOTES', 'Hidden_Field']
+
         self.bands = BAND_WITH_FREQUENCY
         self.custom_fields_list = []
+
+        self.all_possible_missing_fields = {'CALL': self.ui.le_call, 'FREQ': self.ui.le_freq, 'MODE': self.ui.cb_mode,
+                                            'RST_SENT': self.ui.le_rst_sent, 'RST_RCVD': self.ui.le_rst_rcvd}
 
         self.modes = MODES_WITH_SUBMODE
         self.ui.cb_canton.setDisabled(True)
@@ -154,7 +208,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _connectActions(self):
         # UE: Make Timestamp and Country after Call
-        self.ui.le_call.editingFinished.connect(self.new_dxcc_lookup_thread)
+        self.ui.le_call.editingFinished.connect(self.start_lookup_callsign_in_tread)
+
         # UE: Fill Freq from Band und Vice Versa
         self.ui.le_freq.textEdited.connect(self.set_band_from_frequency)
         self.ui.cb_band.currentIndexChanged.connect(self.set_frequency_from_band)
@@ -199,6 +254,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_update_file = QAction("Update File", self)
         self.dev_save_config = QAction("Save Config", self)
         self.dev_change_title = QAction("Change Title", self)
+        self.dev_thread = QAction("StartThread", self)
 
         devMenu = self.menuBar().addMenu("&DEV")
         devMenu.addAction(self.new_dev_menu_method)
@@ -210,6 +266,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         devMenu.addAction(self.dev_change_title)
         # devMenu.addAction(self.devTimePrintAction)
         # devMenu.addAction(self.devAutosaveAction)
+        devMenu.addAction(self.dev_thread)
         self.new_dev_menu_method.triggered.connect(self.new_thread_methoden_test)
         self.dev_fill_up_fields_menu_method.triggered.connect(self.dev_fill_all_fields)
         self.dev_new_file.triggered.connect(self.dev_new_menu_triggered)
@@ -219,6 +276,38 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dev_change_title.triggered.connect(self.dev_set_new_window_title)
         # self.devAutosaveAction.triggered.connect(self.start_timed_autosave_thread)
         # self.devTimePrintAction.triggered.connect(lambda: self.auto_timer_dev(10))
+        self.dev_thread.triggered.connect(self.start_lookup_callsign_in_tread)
+
+    def start_lookup_callsign_in_tread(self):
+        # Just for the User Experience..
+        self.set_time_after_callsign_enter()
+        # Pass the function to execute
+        worker = Worker(self.get_dxcc_from_callsign, self.ui.le_call.text())
+        worker.signals.result.connect(self.auto_enter_dxcc_infos_from_callsign)
+        worker.signals.finished.connect(self.thread_complete)
+        # Execute
+        self.threadpool.start(worker)
+
+    def thread_complete(self):
+        print("THREAD COMPLETE!")
+
+    def get_dxcc_from_callsign(self, callsign: str):
+        # Buffer the File for the Session..
+        if not self.all_dxcc:
+            logging.debug(f"Get Data from: {callsign}")
+            all_dxcc = qrz_lookup.get_plist()
+            self.all_dxcc = all_dxcc
+        else:
+            all_dxcc = self.all_dxcc
+        # Add all keys to all_dxcc_keys
+        all_dxcc_keys = list(all_dxcc.keys())
+        # Sort list by callsign-length (descending)
+        all_dxcc_keys.sort(key=len, reverse=True)
+        for key in all_dxcc_keys:
+            if callsign.startswith(key):
+                logging.debug("Found Match")
+                return all_dxcc.get(key)
+        logging.debug(f"No DXCC Data found to {callsign}")
 
     def new_thread_methoden_test(self):
         t = threading.Thread(target=self.print_something_useful, daemon=True)
@@ -236,7 +325,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def dev_fill_all_fields(self):
         # Just minimal infos for a valid Qso, dev only.
         self.ui.le_call.setText("HB9")
-        self.new_dxcc_lookup_thread()
+        self.start_lookup_callsign_in_tread()
         self.ui.cb_mode.setCurrentIndex(self.ui.cb_mode.findText("CW"))
         self.ui.cb_band.setCurrentIndex(self.ui.cb_band.findText("80m"))
         self.ui.cbo_sent_options.setCurrentIndex(self.ui.cbo_sent_options.findText("Yes"))
@@ -322,6 +411,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.modes = self.user_config.user_settings.get('MY_Modes')
         else:
             self.bands = BAND_WITH_FREQUENCY
+        logging.getLogger().setLevel(self.user_config.user_settings.get('LogLevel'))
 
     def show_config_window(self):
         self.cdw = ConfigDialog(self)
@@ -396,21 +486,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 elif self.ui.cb_mode.currentText() == "SSB":
                     self.ui.le_rst_sent.setText("59")
                     self.ui.le_rst_rcvd.setText("59")
-
-    def new_dxcc_lookup_thread(self):
-        callsign = self.ui.le_call.text()
-        t = threading.Thread(target=self.dxcc_lookup, args=(callsign,), daemon=True)
-        t.start()
-
-    def dxcc_lookup(self, callsign):
-        try:
-            all_dxcc = get_dxcc_from_callsign(callsign)
-        except TypeError:
-            show_error_message("No QRZ-info found",
-                               f"Your callsign {callsign} is invalid and we cannot find any QRZ-info to it!")
-            return
-        self.set_time_after_callsign_enter()
-        self.auto_enter_dxcc_infos_from_callsign(all_dxcc)
 
     def set_time_after_callsign_enter(self):
         # if time not changed, set to now:
@@ -502,11 +577,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                        self.ui.de_qsl_sent_date.date().toString(
                            "yyyyMMdd") if self.ui.de_qsl_sent_date.isEnabled() else ''),
 
-                   'EQSL_QSL_RCVD': True if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
-                   'EQSL_QSL_SENT': True if self.ui.cb_eqsl_sent_new.isChecked() else '',
+                   'EQSL_QSL_RCVD': 'Y' if self.ui.cb_eqsl_rcvd_new.isChecked() else '',
+                   'EQSL_QSL_SENT': 'Y' if self.ui.cb_eqsl_sent_new.isChecked() else '',
 
-                   'LOTW_QSL_RCVD': True if self.ui.cb_lotw_rcvd_new.isChecked() else '',
-                   'LOTW_QSL_SENT': True if self.ui.cb_lotw_sent_new.isChecked() else '',
+                   'LOTW_QSL_RCVD': 'Y' if self.ui.cb_lotw_rcvd_new.isChecked() else '',
+                   'LOTW_QSL_SENT': 'Y' if self.ui.cb_lotw_sent_new.isChecked() else '',
 
                    'COUNTRY': self.ui.le_country.text(),
                    'STATE': self.ui.cb_canton.currentText(),
@@ -516,29 +591,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                    }
         return new_qso
 
+    def clear_missing_fields_border(self):
+        # Reset Style Sheet on Input Fields
+        for field in self.all_possible_missing_fields.values():
+            field.setStyleSheet("")
+
+    def set_boarder_on_missing_fields(self, missing_fields):
+        self.clear_missing_fields_border()
+        # Set a Red Border on Missing Input Fields
+        for missing_field in missing_fields:
+            if missing_field in self.all_possible_missing_fields:
+                self.all_possible_missing_fields[missing_field].setStyleSheet("border : 1px solid red")
+
     def save_new_log_entry(self):
         new_qso = self.get_dict_from_inputform()
-        new_qso = remove_empty_fields(new_qso)
+        #        new_qso = remove_empty_fields(new_qso)
         missing_fields = are_minimum_qso_data_present(new_qso)
         if not missing_fields:
+            self.clear_missing_fields_border()
             self.clear_new_log_entry_form()
             self.model.add_new_qso_method_two(new_qso)
-            # self.model.add_new_qso_method_one(new_qso)
         else:
             show_error_message("No Valid QSO", "Please fill in all the required fields.")
-            all_possible_missing_fields = {'CALL': self.ui.le_call,
-                                           'FREQ': self.ui.le_freq,
-                                           'MODE': self.ui.cb_mode,
-                                           'RST_SENT': self.ui.le_rst_sent,
-                                           'RST_RCVD': self.ui.le_rst_rcvd}
-
-            # Reset Style Sheet on Input Fields
-            for field in all_possible_missing_fields.values():
-                field.setStyleSheet("")
-            # Set a Red Border on Missing Input Fields
-            for missing_field in missing_fields:
-                if missing_field in all_possible_missing_fields:
-                    all_possible_missing_fields[missing_field].setStyleSheet("border : 1px solid red")
+            self.set_boarder_on_missing_fields(missing_fields)
 
     def clear_new_log_entry_form(self):
         self.update_qso = False
@@ -570,6 +645,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.ui.dateEdit.setDate(QDate.fromString("20000101", "yyyyMMdd"))
         self.ui.timeEdit.setTime(QTime.fromString('000000', "HHmmss"))
+
+        self.clear_missing_fields_border()
 
     # Switch verbergen/anzeigen von Tabellenspalte
     def hide_and_seek(self):
@@ -612,7 +689,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"JSON File will be saved to {filename}")
-            generic_save_data_to_file(filename, self.model.get_data_from_table())
+            # Prune Data
+            pruned_full_qso_list = prune_qsos(self.model.get_data_from_table())
+            generic_save_data_to_file(filename, pruned_full_qso_list)
             self.set_do_we_have_unsaved_changes(False)
             return True
 
@@ -636,7 +715,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filedialog.exec_():
             filename = filedialog.selectedFiles()[0]
             logging.debug(f"ADIF File {filename} will be exported")
-            generic_save_data_to_file(filename, self.model.get_data_from_table(), self.custom_fields_list)
+            # Prune Data
+            pruned_full_qso_list = prune_qsos(self.model.get_data_from_table())
+            generic_save_data_to_file(filename, pruned_full_qso_list, self.custom_fields_list)
             self.set_do_we_have_unsaved_changes(False)
 
     def adif_load_file_chooser(self):
@@ -665,7 +746,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.update_qso:
             self.update_qso = False
             updated_qso = self.get_dict_from_inputform()
-            updated_qso = remove_empty_fields(updated_qso)
             row = self.row
             self.model.update_single_qso(row, updated_qso)
             self.clear_new_log_entry_form()
@@ -714,16 +794,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ui.cb_lotw_sent_new.setChecked(True if edit_QSO_dict.get('LOTW_QSL_SENT') else False)
 
     def save_unsaved_changes(self):
-        close_window = True
         if self._do_we_have_unsaved_changes:
-            reply = QMessageBox.question(self, 'Window Close', "Save Changes before Exit?",
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            msgbox = QMessageBox()
+            msgbox.setIcon(QMessageBox.Question)
+            msgbox.setWindowTitle('Window Close')
+            msgbox.setText('Save Changes before Exit?')
+            msgbox.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            msgbox.setDefaultButton(QMessageBox.Yes)
+            reply = msgbox.exec_()
             if reply == QMessageBox.Yes:
-                close_window = self.json_save_file_chooser()
-        return close_window
+                return self.json_save_file_chooser()
+            if reply == QMessageBox.No:
+                return True
+        else:
+            return True
 
     def closeEvent(self, event):
-        if self.save_unsaved_changes():
+        msgbox_return = self.save_unsaved_changes()
+        if msgbox_return:
             event.accept()
         else:
             event.ignore()

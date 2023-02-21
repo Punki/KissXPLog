@@ -1,8 +1,10 @@
 import logging
+from venv import logger
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog
 
+from KissXPLog import messages
 from KissXPLog.const_adif_fields import MODES_WITH_SUBMODE, BAND_WITH_FREQUENCY
 from KissXPLog.dialog.filter_dialog import FilterDialog
 from KissXPLog.dialog.form import Ui_Widget
@@ -19,6 +21,13 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.cb_autosave_interval.setMinimum(0)
         self.checked_bands = None
         self.checked_modes = None
+        self.loglevel = {"NOTSET": [logging.NOTSET],
+                             'DEBUG': [logging.DEBUG],
+                             'INFO': [logging.INFO],
+                             'WARN': [logging.WARN],
+                             'ERROR': [logging.ERROR],
+                             'CRITICAL': [logging.CRITICAL]}
+        self.ui2.cb_loglevel.addItems(self.loglevel)
         self.load_config()
 
         # Alle möglichen Werte
@@ -31,8 +40,6 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.ui2.pb_bands_filter.clicked.connect(self.show_bands_filter_dialog)
         self.ui2.pb_modes_filter.clicked.connect(self.show_modes_filter_dialog)
 
-        self.ui2.cb_loglevel.addItems(["NOSET", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"])
-
     def load_config(self):
         # Callsign Uppercase
         self.ui2.le_my_call.textChanged.connect(lambda: self.ui2.le_my_call.setText(self.ui2.le_my_call.text().upper()))
@@ -40,9 +47,11 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         my_call = self.other_class_handle.user_config.user_settings['STATION_CALLSIGN']
         my_cq_zone = self.other_class_handle.user_config.user_settings['MY_CQ_ZONE']
         my_itu_zone = self.other_class_handle.user_config.user_settings['MY_ITU_ZONE']
+        my_loglevel = self.other_class_handle.user_config.user_settings['LogLevel']
         self.ui2.le_my_call.setText(my_call)
         self.ui2.le_my_cqzone.setText(my_cq_zone)
         self.ui2.le_my_ituzone.setText(my_itu_zone)
+        self.ui2.cb_loglevel.setCurrentText(my_loglevel)
 
         self.ui2.cb_autosave.setChecked(self.other_class_handle.autosave)
         self.ui2.cb_autosave_interval.setValue(self.other_class_handle.autosave_interval)
@@ -72,6 +81,7 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.other_class_handle.user_config.user_settings['STATION_CALLSIGN'] = self.ui2.le_my_call.text()
         self.other_class_handle.user_config.user_settings['MY_CQ_ZONE'] = self.ui2.le_my_cqzone.text()
         self.other_class_handle.user_config.user_settings['MY_ITU_ZONE'] = self.ui2.le_my_ituzone.text()
+        self.other_class_handle.user_config.user_settings['LogLevel'] = self.ui2.cb_loglevel.currentText()
 
         my_modes_with_sub = {}
         for mode in self.checked_modes:
@@ -80,21 +90,8 @@ class ConfigDialog(QtWidgets.QWidget, Ui_Widget):
         self.other_class_handle.user_config.save_user_settings_to_file()
 
         # set Logging Level
-        logging_level = self.ui2.cb_loglevel.currentText()
-        if logging_level == "NOSET":
-            logging.getLogger().setLevel(logging.NOTSET)
-        elif logging_level == "DEBUG":
-            logging.getLogger().setLevel(logging.DEBUG)
-        elif logging_level == "INFO":
-            logging.getLogger().setLevel(logging.INFO)
-        elif logging_level == "WARN":
-            logging.getLogger().setLevel(logging.WARNING)
-        elif logging_level == "ERROR":
-            logging.getLogger().setLevel(logging.ERROR)
-        elif logging_level == "CRITICAL":
-            logging.getLogger().setLevel(logging.CRITICAL)
-
-        #print("Set Logging Level to {}".format(logging.getLogger().getEffectiveLevel()))
+        logging.getLogger().setLevel(self.loglevel.get(self.ui2.cb_loglevel.currentText())[0])
+        print("Log level switched to: ", logging.getLevelName(logger.getEffectiveLevel()))
 
         # Set Settings Live:
         self.other_class_handle.ui.cb_mode.clear()

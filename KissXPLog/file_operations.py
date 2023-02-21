@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from datetime import datetime
 
 from PyQt5.QtWidgets import QFileDialog
 
@@ -16,11 +17,11 @@ def initial_file_dialog_config(file_extension):
     if file_extension == "json":
         filedialog.setDefaultSuffix("json")
         filedialog.setNameFilter("Json Datenbank (*.json);;All files (*.*)")
-        filedialog.selectFile("QSO_MGM_Export.json")
+        filedialog.selectFile("{}-KissXPLog_Export.json".format(datetime.today().strftime('%Y-%m-%d')))
     elif file_extension == "adif" or file_extension == "adi":
         filedialog.setDefaultSuffix("adi")
         filedialog.setNameFilter("Adif (*.adi);;All files (*.*)")
-        filedialog.selectFile("QSO_Export.adi")
+        filedialog.selectFile("{}-KissXPLog_Export.adi".format(datetime.today().strftime('%Y-%m-%d')))
     elif file_extension == "adi_json":
         filedialog.setNameFilter(" (*.adi *.json);;All files (*.*)")
     else:

@@ -27,6 +27,7 @@ class UserConfig:
             self.user_settings['MY_CQ_ZONE'] = None
             self.user_settings['MY_ITU_ZONE'] = None
             self.user_settings['Last_Used_DB'] = None
+            self.user_settings['LogLevel'] = 'DEBUG'
 
     def reset_fields_for_second_instance(self):
         self.user_settings['Last_Used_DB'] = None
