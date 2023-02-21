@@ -70,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super().__init__()
 
         self.threadpool = QThreadPool()
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        #print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         self.cdw = None
         self.ui = Ui_MainWindow()
@@ -79,6 +79,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._createActions()
         self._createMenuBar()
         self._connectActions()
+        # Just Uncomment if your know what you're doing!
         self._createFullDevMenu()
 
         self.show()
